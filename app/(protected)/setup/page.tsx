@@ -101,7 +101,7 @@ export default function SetupPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
               onClick={() => setIncomeType("SALARIED")}
-              className="group relative p-6 md:p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300 text-left"
+              className="group relative p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300 text-left"
             >
               <div className="text-4xl mb-4">💼</div>
               <h2 className="text-xl font-bold text-white mb-2">
@@ -139,7 +139,7 @@ export default function SetupPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
               onClick={() => setIncomeType("FREELANCER")}
-              className="group relative p-6 md:p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300 text-left"
+              className="group relative p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300 text-left"
             >
               <div className="text-4xl mb-4">💰</div>
               <h2 className="text-xl font-bold text-white mb-2">
@@ -179,7 +179,7 @@ export default function SetupPage() {
   // Step-based Setup Form
   return (
     <div className="relative z-10 flex min-h-[calc(100vh-69px)] flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-sm sm:max-w-lg">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -239,7 +239,7 @@ export default function SetupPage() {
 
         {/* Card */}
         <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
-          <div className="p-8">
+          <div className="p-4 sm:p-8">
             <form onSubmit={handleSubmit(onSubmit)}>
               <AnimatePresence mode="wait">
 

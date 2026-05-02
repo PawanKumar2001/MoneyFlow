@@ -54,7 +54,7 @@ export default function LoginPage() {
           <p className="text-sm text-slate-400 mt-1">Sign in to MoneyFlow</p>
         </CardHeader>
 
-        <CardContent className="px-8 pb-8 pt-4">
+        <CardContent className="px-4 sm:px-8 pb-6 sm:pb-8 pt-4">
           {/* Google Button */}
           <Button
             type="button"
