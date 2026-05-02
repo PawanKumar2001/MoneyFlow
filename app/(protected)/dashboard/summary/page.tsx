@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useMonthStore } from "@/store/monthStore";
 import { getMonthlySummary, getMonthlyTrend } from "@/actions/summary";
 import { generateInsights } from "@/lib/insights";
-import { getCurrencySymbol } from "@/lib/currency";
+import { getCurrencySymbol, formatAmount } from "@/lib/currency";
 import { motion } from "framer-motion";
 import ChartSkeleton from "@/components/shared/ChartSkelton";
 import { generateExpenseCSV, downloadCSV } from "@/lib/csv";
@@ -213,17 +213,17 @@ export default function SummaryPage() {
         {[
           {
             label: isFreelancer ? "Earnings" : "Income",
-            value: `${symbol}${data!.totalIncome.toLocaleString()}`,
+            value: `${symbol}${formatAmount(data!.totalIncome)}`,
             color: "text-emerald-400",
           },
           {
             label: "Expenses",
-            value: `${symbol}${data!.totalExpenses.toLocaleString()}`,
+            value: `${symbol}${formatAmount(data!.totalExpenses)}`,
             color: "text-red-400",
           },
           {
             label: "Remaining",
-            value: `${symbol}${Math.max(data!.remaining, 0).toLocaleString()}`,
+            value: `${symbol}${formatAmount(Math.max(data!.remaining, 0))}`,
             color: "text-indigo-400",
           },
           {
@@ -513,7 +513,7 @@ export default function SummaryPage() {
                           {expense.category}
                         </td>
                         <td className="px-4 py-3 font-semibold text-emerald-400">
-                          {symbol}{expense.amount.toLocaleString()}
+                          {symbol}{formatAmount(expense.amount)}
                         </td>
                         <td className="px-4 py-3 text-slate-400">
                           {new Date(expense.date).toLocaleDateString("en-US", {
@@ -541,10 +541,10 @@ export default function SummaryPage() {
                         Total Expenses
                       </td>
                       <td className="px-4 py-3 font-bold text-red-400">
-                        {symbol}{data!.totalExpenses.toLocaleString()}
+                        {symbol}{formatAmount(data!.totalExpenses)}
                       </td>
                       <td colSpan={2} className="px-4 py-3 text-xs text-slate-500">
-                        Remaining: {symbol}{Math.max(data!.remaining, 0).toLocaleString()}
+                        Remaining: {symbol}{formatAmount(Math.max(data!.remaining, 0))}
                       </td>
                     </tr>
                   </tfoot>

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Pencil, Trash2, TrendingUp } from "lucide-react";
-import { getCurrencySymbol } from "@/lib/currency";
+import { getCurrencySymbol, formatAmount } from "@/lib/currency";
 
 type IncomeEntry = {
   id: string;
@@ -53,7 +53,7 @@ export default function IncomeCard({
       {/* Amount + Actions */}
       <div className="flex items-center gap-3 shrink-0">
         <span className="text-sm font-bold text-emerald-400">
-          {symbol}{entry.amount.toLocaleString()}
+          {symbol}{formatAmount(entry.amount)}
         </span>
 
         <div className="flex items-center gap-1">

@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Pencil, PlusCircle } from "lucide-react";
+import { getCurrencySymbol, formatAmount } from "@/lib/currency";
+
 
 type Props = {
   totalIncome: number;
@@ -10,8 +12,6 @@ type Props = {
   incomeType: string;
   onEditIncome?: () => void;
 };
-
-import { getCurrencySymbol } from "@/lib/currency";
 
 export default function IncomeSummaryBar({
   totalIncome,
@@ -38,17 +38,17 @@ export default function IncomeSummaryBar({
             <div className="grid grid-cols-2 md:flex md:flex-wrap gap-x-6 gap-y-2">
             <Stat
               label={isFreelancer ? "This Month's Earnings" : "Monthly Income"}
-              value={`${symbol}${totalIncome.toLocaleString()}`}
+              value={`${symbol}${formatAmount(totalIncome)}`}
               color="text-white"
             />
             <Stat
               label="Total Expenses"
-              value={`${symbol}${totalExpenses.toLocaleString()}`}
+              value={`${symbol}${formatAmount(totalExpenses)}`}
               color="text-red-400"
             />
             <Stat
               label="Remaining"
-              value={`${symbol}${remaining.toLocaleString()}`}
+              value={`${symbol}${formatAmount(remaining)}`}
               color={remaining >= 0 ? "text-emerald-400" : "text-red-400"}
             />
             <Stat
@@ -90,7 +90,7 @@ export default function IncomeSummaryBar({
           {isFreelancer
             ? totalIncome === 0
               ? "No income added this month yet — tap Add Income to add"
-              : `${symbol}${totalExpenses.toLocaleString()} spent from ${symbol}${totalIncome.toLocaleString()} earned`
+              : `${symbol}${formatAmount(totalExpenses)} spent from ${symbol}${formatAmount(totalIncome)} earned`
             : `${symbol}${totalExpenses.toLocaleString()} spent from ${new Date().toLocaleString("default", { month: "long" })} income`}
         </p>
       </div>

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Pencil, Trash2, RefreshCw } from "lucide-react";
-import { getCurrencySymbol } from "@/lib/currency";
+import { getCurrencySymbol, formatAmount } from "@/lib/currency";
 
 type Subscription = {
   id: string;
@@ -67,7 +67,7 @@ export default function SubscriptionCard({
       <div className="flex items-center gap-3 shrink-0">
         <div className="text-right">
           <p className="text-sm font-bold text-emerald-400">
-            {symbol}{subscription.amount.toLocaleString()}
+            {symbol}{formatAmount(subscription.amount)}
           </p>
           <p className="text-xs text-slate-500">/ month</p>
         </div>

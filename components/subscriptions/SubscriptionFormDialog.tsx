@@ -133,11 +133,15 @@ export default function SubscriptionFormDialog({ open, onClose, subscription }: 
             <Label className="text-slate-300">Monthly Amount</Label>
             <Input
               type="number"
-              placeholder="0"
+              step="0.01"
+              placeholder="0.00"
               className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
               {...register("amount", {
                 required: "Amount is required",
-                min: { value: 1, message: "Amount must be greater than 0" },
+                min: { value: 0.01, message: "Amount must be greater than 0" },
+                validate: (v) =>
+                  /^\d+(\.\d{1,2})?$/.test(String(v)) ||
+                  "Max 2 decimal places allowed",
               })}
             />
             {errors.amount && (
