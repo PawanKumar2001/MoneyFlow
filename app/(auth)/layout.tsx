@@ -21,11 +21,6 @@ export default function AuthLayout({
       <div className="w-full max-w-sm sm:max-w-md">
         {children}
       </div>
-
-      {/* Footer */}
-      <p className="mt-6 text-xs text-slate-600">
-        MoneyFlow v0.0.1 · © {new Date().getFullYear()} All rights reserved
-      </p>
     </div>
   );
 }
