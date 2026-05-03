@@ -72,13 +72,11 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
           <div className="flex h-16 items-center justify-between">
             {/* Left — Logo + Username */}
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white shadow-lg shadow-white/20 shrink-0">
                 <img
                   src="/favicon.png"
                   alt="MoneyFlow"
                   className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl"
                 />
-              </div>
               <div className="hidden sm:block">
                 <span className="text-xs text-slate-500 block leading-none">
                   Welcome back
