@@ -6,7 +6,6 @@ export default function MatrixCanvas() {
   useEffect(() => {
     const canvas = document.getElementById("matrix-canvas") as HTMLCanvasElement;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -17,7 +16,6 @@ export default function MatrixCanvas() {
     const columns = Math.floor(canvas.width / fontSize);
     const drops: number[] = Array(columns).fill(1);
 
-    // Wave state
     let waveActive = false;
     let waveX = 0;
 
@@ -32,7 +30,6 @@ export default function MatrixCanvas() {
       ctx.font = `${fontSize}px monospace`;
 
       for (let i = 0; i < drops.length; i++) {
-        // Wave effect — only draw near the wave front
         if (waveActive) {
           const distFromWave = Math.abs(i - waveX);
           if (distFromWave > 8) continue;
@@ -52,13 +49,11 @@ export default function MatrixCanvas() {
         drops[i]++;
       }
 
-      // Advance wave diagonally
       if (waveActive) {
         waveX += 1.5;
         if (waveX > columns + 10) {
           waveActive = false;
           waveX = 0;
-          // Clear canvas after wave passes
           setTimeout(() => {
             if (!ctx) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -67,12 +62,13 @@ export default function MatrixCanvas() {
       }
     }
 
-    // Trigger wave every 2 seconds
     const triggerWave = () => {
       waveActive = true;
       waveX = -10;
     };
 
+    // First wave after 2 seconds, then every 2 seconds
+    setTimeout(triggerWave, 2000);
     const waveInterval = setInterval(triggerWave, 2000);
     const animInterval = setInterval(drawMatrix, 33);
 
@@ -89,5 +85,11 @@ export default function MatrixCanvas() {
     };
   }, []);
 
-  return null;
+  return (
+    <canvas
+      id="matrix-canvas"
+      className="fixed inset-0 w-full h-full pointer-events-none z-0"
+      style={{ opacity: 0.15 }}
+    />
+  );
 }
