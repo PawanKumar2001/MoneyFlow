@@ -146,13 +146,13 @@ export default function IncomePage() {
               placeholder="Search Income Entries"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500 w-full h-10"
+              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 w-full h-10"
             />
           </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="sm:w-36 px-3 py-2 h-10 rounded-lg bg-slate-900 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500 cursor-pointer"
+            className="sm:w-36 px-3 py-2 h-10 rounded-lg bg-black-80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 cursor-pointer"
           >
             <option value="newest" className="bg-slate-900">Newest</option>
             <option value="highest" className="bg-slate-900">Highest</option>

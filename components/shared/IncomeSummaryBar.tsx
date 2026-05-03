@@ -33,7 +33,7 @@ export default function IncomeSummaryBar({
 
   return (
     <div className="sticky top-[68px] z-40 w-full px-6 md:px-12 lg:px-20 py-3">
-      <div className="relative rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-4 shadow-xl">
+      <div className="relative rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl p-4 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
             <div className="grid grid-cols-2 md:flex md:flex-wrap gap-x-6 gap-y-2">
             <Stat

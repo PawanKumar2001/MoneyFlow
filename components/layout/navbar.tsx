@@ -65,7 +65,7 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
         className="sticky top-0 z-50 w-full"
       >
         {/* Glassmorphism background */}
-        <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xl border-b border-white/10" />
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-xl border-b border-white/10" />
 
         <div className="relative px-4 md:px-12 lg:px-20 py-1">
           {/* Top Row */}
@@ -127,7 +127,7 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
               {/* Profile Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-white/50">
                     <Avatar className="h-8 w-8 border border-white/20">
                       <AvatarImage src={image ?? ""} />
                       <AvatarFallback className="bg-indigo-600 text-white text-xs">
@@ -139,7 +139,7 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
                 <DropdownMenuContent
                   align="end"
                   sideOffset={8}
-                  className="w-56 bg-slate-900/95 backdrop-blur-xl border-0 shadow-2xl shadow-black/50 text-white rounded-xl z-[60] mt-3"
+                  className="w-56 bg-black/95 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 text-white rounded-xl z-[60] mt-3"
                 >
                   <div className="px-3 py-2">
                     <p className="text-sm font-medium text-white">{username}</p>
@@ -193,7 +193,7 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          className="fixed top-[68px] left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-xl border-b border-white/10 px-4 py-4 space-y-4 md:hidden"
+          className="fixed top-[68px] left-0 right-0 z-40 bg-black/95 backdrop-blur-xl border-b border-white/10 px-4 py-4 space-y-4 md:hidden"
         >
           {/* Month Selector */}
           <div className="flex justify-center">
@@ -210,9 +210,10 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
                   key={tab.href}
                   href={tab.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${isActive
-                      ? "bg-indigo-600/30 border border-indigo-500/30 text-white"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left ${
+                      pathname === tab.href
+                        ? "bg-white/15 border border-white/30 text-white"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                 >
                   <Icon className="h-4 w-4" />

@@ -161,7 +161,7 @@ export default function DashboardPage() {
               placeholder="Search Expenses"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500 w-full h-10"
+              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white-50 w-full h-10"
             />
           </div>
 
@@ -170,7 +170,7 @@ export default function DashboardPage() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full sm:w-44 px-3 py-2 h-10 rounded-lg bg-slate-900 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="w-full sm:w-44 px-3 py-2 h-10 rounded-lg bg-black-80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 cursor-pointer"
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat} className="bg-slate-900">{cat}</option>
@@ -179,7 +179,7 @@ export default function DashboardPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full sm:w-36 px-3 py-2 h-10 rounded-lg bg-slate-900 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="w-full sm:w-36 px-3 py-2 h-10 rounded-lg bg-black-80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 cursor-pointer"
             >
               <option value="newest" className="bg-slate-900">Newest</option>
               <option value="oldest" className="bg-slate-900">Oldest</option>

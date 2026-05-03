@@ -83,7 +83,7 @@ export default function SetupPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-10"
           >
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-500/30">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg shadow-white/20">
               <span className="text-2xl">💸</span>
             </div>
             <h1 className="text-3xl font-bold text-white">
@@ -186,7 +186,7 @@ export default function SetupPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-500/30">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg shadow-white/20">
             <span className="text-2xl">
               {incomeType === "SALARIED" ? "💼" : "💰"}
             </span>
