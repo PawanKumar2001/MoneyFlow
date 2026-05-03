@@ -37,8 +37,6 @@ export default function RootLayout({
         className="min-h-screen flex flex-col bg-black"
         suppressHydrationWarning
       >
-        {/* Matrix Animation */}
-        <MatrixCanvas />
 
         {/* Content */}
         <div className="relative z-10 flex-1 flex flex-col">
@@ -54,6 +52,9 @@ export default function RootLayout({
             </p>
           </div>
         </footer>
+        
+        {/* Matrix Animation */}
+        <MatrixCanvas />
       </body>
     </html>
   );

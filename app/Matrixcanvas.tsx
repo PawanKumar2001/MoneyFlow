@@ -12,14 +12,14 @@ export default function MatrixCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const fontSize = 14;
+    const fontSize = 16;
     const columns = Math.floor(canvas.width / fontSize);
     const drops: number[] = Array(columns).fill(1);
 
     let waveActive = false;
     let waveX = 0;
 
-    const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノ";
+    const chars = "₹ $ € £ ¥ ₩ ₺ ₨ ฿ ₦ ₫ ₪ ₲ ₴ ₵ ₡ ₢ ₣ ₤ ₥ ₧ ₰ ₱ ₳ ₷ ₸ ₼ ₽ ¢ ؋ ﷼ ₾ ₿";
 
     function drawMatrix() {
       if (!ctx) return;
@@ -35,7 +35,7 @@ export default function MatrixCanvas() {
           if (distFromWave > 8) continue;
 
           const intensity = 1 - distFromWave / 8;
-          ctx.fillStyle = `rgba(255, 255, 255, ${intensity * 0.9})`;
+          ctx.fillStyle = `rgba(255, 255, 255, ${intensity * 1.0})`;
         } else {
           continue;
         }
@@ -89,7 +89,7 @@ export default function MatrixCanvas() {
     <canvas
       id="matrix-canvas"
       className="fixed inset-0 w-full h-full pointer-events-none z-0"
-      style={{ opacity: 0.15 }}
+      style={{ opacity: 0.4 }}
     />
   );
 }
