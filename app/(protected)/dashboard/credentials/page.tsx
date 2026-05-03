@@ -55,7 +55,7 @@ export default function CredentialsPage() {
         <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 space-y-6">
           {/* Header */}
           <div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 mb-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-white/20 mb-4">
               <span className="text-xl">🔐</span>
             </div>
             <h2 className="text-2xl font-bold text-white">Change Credentials</h2>
@@ -131,7 +131,7 @@ export default function CredentialsPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white h-11"
+                className="flex-1 bg-white hover:bg-white/90 text-black h-11"
               >
                 {loading ? "Updating..." : "Update Password"}
               </Button>

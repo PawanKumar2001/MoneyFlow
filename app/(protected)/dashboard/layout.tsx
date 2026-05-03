@@ -21,7 +21,7 @@ export default async function DashboardLayout({
   console.log("incomeType:", user?.incomeType);
 
   return (
-    <div className="min-h-[calc(100vh-69px)] bg-slate-950">
+    <div className="min-h-[calc(100vh-69px)] bg-transparent">
       <Navbar
         username={user?.username ?? user?.name ?? null}
         email={user?.email ?? null}
