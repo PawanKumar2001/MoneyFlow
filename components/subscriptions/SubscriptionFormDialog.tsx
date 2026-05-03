@@ -100,7 +100,7 @@ export default function SubscriptionFormDialog({ open, onClose, subscription }: 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
+      <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-black/90 p-6 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-white">
@@ -120,7 +120,7 @@ export default function SubscriptionFormDialog({ open, onClose, subscription }: 
             <Label className="text-slate-300">Subscription Name</Label>
             <Input
               placeholder="e.g. Netflix, Spotify"
-              className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+              className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
               {...register("name", { required: "Name is required" })}
             />
             {errors.name && (
@@ -135,7 +135,7 @@ export default function SubscriptionFormDialog({ open, onClose, subscription }: 
               type="number"
               step="0.01"
               placeholder="0.00"
-              className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+              className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
               {...register("amount", {
                 required: "Amount is required",
                 min: { value: 0.01, message: "Amount must be greater than 0" },
@@ -155,7 +155,7 @@ export default function SubscriptionFormDialog({ open, onClose, subscription }: 
             <Input
               type="number"
               placeholder="e.g. 1, 15, 28"
-              className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+              className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
               {...register("recurringDate", {
                 required: "Recurring date is required",
                 min: { value: 1, message: "Must be between 1 and 28" },
@@ -172,7 +172,7 @@ export default function SubscriptionFormDialog({ open, onClose, subscription }: 
             <Label className="text-slate-300">Starting From</Label>
             <div className="flex gap-2">
               <select
-                className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500"
+                className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50"
                 {...register("startMonth", { required: true })}
               >
                 {MONTHS.map((m) => (
@@ -182,7 +182,7 @@ export default function SubscriptionFormDialog({ open, onClose, subscription }: 
                 ))}
               </select>
               <select
-                className="w-28 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500"
+                className="w-28 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50"
                 {...register("startYear", { required: true })}
               >
                 {years.map((y) => (

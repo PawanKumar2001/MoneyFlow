@@ -110,7 +110,7 @@ export default function LogIncomeModal({
               Income — {MONTHS[month - 1]} {year}
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Log your earnings for this month
+              Add your earnings for this month
             </p>
           </div>
           <button

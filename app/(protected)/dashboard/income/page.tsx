@@ -110,7 +110,7 @@ export default function IncomePage() {
           </div>
           <Button
             onClick={() => { setEditingEntry(null); setShowForm(true); }}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2"
+            className="bg-white hover:bg-white/90 text-black gap-2"
           >
             <PlusCircle className="h-4 w-4" />
             Add Income
