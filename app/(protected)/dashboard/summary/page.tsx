@@ -189,11 +189,6 @@ export default function SummaryPage() {
           <h2 className="text-lg font-bold text-white">Monthly Summary</h2>
           <p className="text-xs text-slate-400 flex items-center gap-2">
             Overview of your finances for this month
-            {isFreelancer && (
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs">
-                Freelancer Mode
-              </span>
-            )}
           </p>
         </div>
         {hasExpenses && (
