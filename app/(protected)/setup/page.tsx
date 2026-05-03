@@ -274,7 +274,7 @@ export default function SetupPage() {
                           <option
                             key={c.code}
                             value={c.code}
-                            className="bg-slate-900"
+                            className="bg-black"
                           >
                             {c.symbol} — {c.name} ({c.code})
                           </option>

@@ -267,7 +267,7 @@ export default function SummaryPage() {
             onClick={() => setActiveTab(i)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
               activeTab === i
-                ? "bg-indigo-600 text-white shadow"
+                ? "bg-white text-black shadow"
                 : "text-slate-400 hover:text-white"
             }`}
           >

@@ -48,7 +48,11 @@ export default function LoginPage() {
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg shadow-white/20"
           >
-            <span className="text-2xl">💸</span>
+            <img
+            src="/favicon.png"
+            alt="MoneyFlow"
+            className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl"
+          />
           </motion.div>
           <h1 className="text-2xl font-bold text-white">Welcome back</h1>
           <p className="text-sm text-slate-400 mt-1">Sign in to MoneyFlow</p>

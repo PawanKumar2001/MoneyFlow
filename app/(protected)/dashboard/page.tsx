@@ -173,7 +173,7 @@ export default function DashboardPage() {
               className="w-full sm:w-44 px-3 py-2 h-10 rounded-lg bg-black-80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 cursor-pointer"
             >
               {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat} className="bg-slate-900">{cat}</option>
+                <option key={cat} value={cat} className="bg-black">{cat}</option>
               ))}
             </select>
             <select
@@ -181,10 +181,10 @@ export default function DashboardPage() {
               onChange={(e) => setSortBy(e.target.value)}
               className="w-full sm:w-36 px-3 py-2 h-10 rounded-lg bg-black-80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 cursor-pointer"
             >
-              <option value="newest" className="bg-slate-900">Newest</option>
-              <option value="oldest" className="bg-slate-900">Oldest</option>
-              <option value="highest" className="bg-slate-900">Highest</option>
-              <option value="lowest" className="bg-slate-900">Lowest</option>
+              <option value="newest" className="bg-black">Newest</option>
+              <option value="oldest" className="bg-black">Oldest</option>
+              <option value="highest" className="bg-black">Highest</option>
+              <option value="lowest" className="bg-black">Lowest</option>
             </select>
           </div>
         </div>

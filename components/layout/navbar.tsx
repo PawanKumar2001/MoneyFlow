@@ -45,7 +45,7 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
     { label: "Subscriptions", href: "/dashboard/subscriptions", icon: RefreshCw },
     { label: "Summary", href: "/dashboard/summary", icon: BarChart2 },
   ];
-  
+
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -73,7 +73,11 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
             {/* Left — Logo + Username */}
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white shadow-lg shadow-white/20 shrink-0">
-                <span className="text-sm">💸</span>
+                <img
+                  src="/favicon.png"
+                  alt="MoneyFlow"
+                  className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl"
+                />
               </div>
               <div className="hidden sm:block">
                 <span className="text-xs text-slate-500 block leading-none">
@@ -97,8 +101,8 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
                       key={tab.href}
                       href={tab.href}
                       className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
-                          ? "text-white"
-                          : "text-slate-400 hover:text-white hover:bg-white/5"
+                        ? "text-white"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
                         }`}
                     >
                       {isActive && (
@@ -210,10 +214,9 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
                   key={tab.href}
                   href={tab.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left ${
-                      pathname === tab.href
-                        ? "bg-white/15 border border-white/30 text-white"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left ${pathname === tab.href
+                      ? "bg-white/15 border border-white/30 text-white"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                 >
                   <Icon className="h-4 w-4" />
