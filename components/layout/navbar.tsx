@@ -72,7 +72,7 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
           <div className="flex h-16 items-center justify-between">
             {/* Left — Logo + Username */}
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 shadow-lg shadow-indigo-500/30 shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white shadow-lg shadow-white/20 shrink-0">
                 <span className="text-sm">💸</span>
               </div>
               <div className="hidden sm:block">
@@ -104,7 +104,7 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
                       {isActive && (
                         <motion.div
                           layoutId="activeTab"
-                          className="absolute inset-0 bg-indigo-600/30 rounded-lg border border-indigo-500/30"
+                          className="absolute inset-0 bg-white/10 rounded-lg border border-white/20"
                           transition={{
                             type: "spring",
                             bounce: 0.2,

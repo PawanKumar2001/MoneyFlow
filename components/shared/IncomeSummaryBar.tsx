@@ -80,8 +80,8 @@ export default function IncomeSummaryBar({
               spentPercent > 90
                 ? "bg-red-500"
                 : spentPercent > 70
-                ? "bg-amber-500"
-                : "bg-indigo-500"
+                ? "bg-amber-400"
+                : "bg-white"
             }`}
           />
         </div>

@@ -182,7 +182,7 @@ export default function ExpenseFormDialog({ open, onClose, expense }: Props) {
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
+              className="flex-1 bg-white hover:bg-white/90 text-black"
             >
               {loading ? "Saving..." : expense ? "Update" : "Add Expense"}
             </Button>

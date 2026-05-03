@@ -92,7 +92,7 @@ export default function SetupUsernamePage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white h-11"
+              className="w-full bg-white hover:bg-white/90 text-black h-11"
             >
               {loading ? "Setting up..." : "Continue →"}
             </Button>

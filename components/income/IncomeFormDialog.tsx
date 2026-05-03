@@ -139,7 +139,7 @@ export default function IncomeFormDialog({
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
+              className="flex-1 bg-white hover:bg-white/90 text-black"
             >
               {loading ? "Saving..." : entry ? "Update" : "Log Income"}
             </Button>

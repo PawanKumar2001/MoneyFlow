@@ -145,7 +145,7 @@ export default function DashboardPage() {
           </div>
           <Button
             onClick={() => { setEditingExpense(null); setShowForm(true); }}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white gap-2"
+            className="bg-white hover:bg-white/90 text-black gap-2"
           >
             <PlusCircle className="h-4 w-4" />
             Add Expense

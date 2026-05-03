@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import MatrixCanvas from "./Matrixcanvas";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,9 +20,9 @@ export const metadata: Metadata = {
   },
   description: "Know exactly where your money goes.",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
@@ -31,53 +32,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body
-        className="min-h-screen flex flex-col bg-slate-950"
+        className="min-h-screen flex flex-col bg-black"
         suppressHydrationWarning
       >
-       
-        <main className="flex-1">
+        {/* Matrix Animation */}
+        <MatrixCanvas />
+
+        {/* Content */}
+        <div className="relative z-10 flex-1 flex flex-col">
           {children}
-        </main>
+        </div>
 
         {/* Footer */}
         <footer className="relative z-10 border-t border-white/5 py-4 bg-transparent">
           <div className="flex flex-col items-center justify-center gap-1 text-center">
-            <p className="text-xs text-slate-400">
-              MoneyFlow v0.0.1
-            </p>
-
+            <p className="text-xs text-slate-400">MoneyFlow v1.0.0</p>
             <p className="text-xs text-slate-500">
               © {new Date().getFullYear()} All rights reserved
             </p>
           </div>
         </footer>
-         <div className="fixed inset-0 bg-gradient-to-br from-indigo-950/30 via-slate-950 to-emerald-950/20 pointer-events-none" />
-        <div className="fixed top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-blob pointer-events-none" />
-        <div className="fixed top-[50%] right-[-10%] w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl animate-blob animation-delay-2000 pointer-events-none" />
-        <div className="fixed bottom-[-10%] left-[30%] w-96 h-96 bg-indigo-400/10 rounded-full blur-3xl animate-blob animation-delay-4000 pointer-events-none" />
-
-        {/* Floating particles */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full bg-indigo-400/20 animate-float"
-              style={{
-                width: `${Math.random() * 6 + 2}px`,
-                height: `${Math.random() * 6 + 2}px`,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDuration: `${Math.random() * 10 + 8}s`,
-                animationDelay: `${Math.random() * 5}s`,
-              }}
-            />
-          ))}
-        </div>
       </body>
     </html>
   );

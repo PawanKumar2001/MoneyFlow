@@ -549,7 +549,7 @@ export default function SetupPage() {
                 {step < STEPS.length - 1 ? (
                   <Button
                     type="button"
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
+                    className="flex-1 bg-white hover:bg-white/90 text-black"
                     onClick={nextStep}
                   >
                     Continue
@@ -558,7 +558,7 @@ export default function SetupPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                    className="flex-1 bg-white hover:bg-white/90 text-black shadow-lg shadow-emerald-500/20"
                   >
                     {loading ? "Setting up..." : "Launch MoneyFlow 🚀"}
                   </Button>
