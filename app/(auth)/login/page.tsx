@@ -45,7 +45,7 @@ export default function LoginPage() {
             <img
             src="/favicon.png"
             alt="MoneyFlow"
-            className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl"
+            className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl mx-auto"
           />
           <h1 className="text-2xl font-bold text-white">Welcome back</h1>
           <p className="text-sm text-slate-400 mt-1">Sign in to MoneyFlow</p>
