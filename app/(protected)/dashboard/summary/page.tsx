@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useMonthStore } from "@/store/monthStore";
 import { getMonthlySummary, getMonthlyTrend } from "@/actions/summary";
 import { generateInsights } from "@/lib/insights";
@@ -64,17 +64,36 @@ export default function SummaryPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
 
+  const cacheRef = useRef<{ key: string; data: SummaryData; trend: TrendData } | null>(null);
+
   useEffect(() => {
+    const cacheKey = `${month}-${year}`;
+
+    // Use cache if same month/year
+    if (cacheRef.current?.key === cacheKey) {
+      setData(cacheRef.current.data);
+      setTrend(cacheRef.current.trend);
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       const [result, trendResult] = await Promise.all([
         getMonthlySummary(month, year),
         getMonthlyTrend(month, year),
       ]);
-      setData(result as SummaryData);
-      setTrend(trendResult as TrendData);
+      const summaryData = result as SummaryData;
+      const trendData = trendResult as TrendData;
+
+      // Store in cache
+      cacheRef.current = { key: cacheKey, data: summaryData, trend: trendData };
+
+      setData(summaryData);
+      setTrend(trendData);
       setLoading(false);
     };
+
     fetchData();
   }, [month, year]);
 

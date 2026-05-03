@@ -82,11 +82,19 @@ export default function IncomePage() {
   const handleDelete = async () => {
     if (!deletingId) return;
     setDeleteLoading(true);
-    await deleteFreelanceIncome(deletingId);
-    toast.success("Income entry deleted!");
+
+    // Optimistic update
+    setEntries((prev) => prev.filter((e) => e.id !== deletingId));
     setDeletingId(null);
+
+    const result = await deleteFreelanceIncome(deletingId);
+    if (result?.error) {
+      toast.error("Failed to delete. Please refresh.");
+      fetchEntries();
+    } else {
+      toast.success("Income entry deleted!");
+    }
     setDeleteLoading(false);
-    fetchEntries();
   };
 
   return (

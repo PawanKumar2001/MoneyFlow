@@ -2,7 +2,6 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
 
 export async function getUserIncome() {
   const session = await auth();
@@ -63,7 +62,6 @@ export async function logFreelanceIncome(data: {
     },
   });
 
-  revalidatePath("/dashboard/income");
   return { success: true };
 }
 
@@ -82,7 +80,6 @@ export async function updateFreelanceIncome(
     },
   });
 
-  revalidatePath("/dashboard/income");
   return { success: true };
 }
 
@@ -94,7 +91,6 @@ export async function deleteFreelanceIncome(id: string) {
     where: { id, userId: session.user.id },
   });
 
-  revalidatePath("/dashboard/income");
   return { success: true };
 }
 
@@ -162,6 +158,5 @@ export async function updateIncome(data: {
     }
   }
 
-  revalidatePath("/dashboard");
   return { success: true };
 }

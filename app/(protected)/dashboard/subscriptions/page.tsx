@@ -51,11 +51,19 @@ export default function SubscriptionsPage() {
 const handleDelete = async () => {
     if (!deletingId) return;
     setDeleteLoading(true);
-    await deleteSubscription(deletingId);
-    toast.success("Subscription removed!");
+
+    // Optimistic update
+    setSubscriptions((prev) => prev.filter((s) => s.id !== deletingId));
     setDeletingId(null);
+
+    const result = await deleteSubscription(deletingId);
+    if (result?.error) {
+      toast.error("Failed to remove. Please refresh.");
+      fetchSubscriptions();
+    } else {
+      toast.success("Subscription removed!");
+    }
     setDeleteLoading(false);
-    fetchSubscriptions();
   };
   
   const totalMonthly = subscriptions.reduce((sum, s) => sum + s.amount, 0);

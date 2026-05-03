@@ -2,7 +2,6 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
 
 type SubscriptionData = {
   name: string;
@@ -44,8 +43,6 @@ export async function addSubscription(data: SubscriptionData) {
 
   // Generate expense for current month if subscription started
   await generateSubscriptionExpense(subscription.id, session.user.id);
-
-  revalidatePath("/dashboard/subscriptions");
   return { success: true };
 }
 
@@ -68,7 +65,6 @@ export async function updateSubscription(id: string, data: SubscriptionData) {
     },
   });
 
-  revalidatePath("/dashboard/subscriptions");
   return { success: true };
 }
 
@@ -104,9 +100,6 @@ export async function deleteSubscription(id: string) {
       await db.expense.delete({ where: { id: expense.id } });
     }
   }
-
-  revalidatePath("/dashboard");
-  revalidatePath("/dashboard/subscriptions");
   return { success: true };
 }
 

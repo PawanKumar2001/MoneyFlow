@@ -2,7 +2,6 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
 
 type ExpenseData = {
   name: string;
@@ -44,7 +43,6 @@ export async function addExpense(data: ExpenseData) {
     },
   });
 
-  revalidatePath("/dashboard");
   return { success: true };
 }
 
@@ -66,7 +64,6 @@ export async function updateExpense(id: string, data: ExpenseData) {
     },
   });
 
-  revalidatePath("/dashboard");
   return { success: true };
 }
 
@@ -78,6 +75,5 @@ export async function deleteExpense(id: string) {
     where: { id, userId: session.user.id },
   });
 
-  revalidatePath("/dashboard");
   return { success: true };
 }

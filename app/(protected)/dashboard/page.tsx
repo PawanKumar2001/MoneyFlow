@@ -46,6 +46,7 @@ export default function DashboardPage() {
   const [currency, setCurrency] = useState("INR");
   const [incomeType, setIncomeType] = useState("SALARIED");
   const [showEditIncome, setShowEditIncome] = useState(false);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -107,11 +108,20 @@ export default function DashboardPage() {
   const handleDelete = async () => {
     if (!deletingId) return;
     setDeleteLoading(true);
-    await deleteExpense(deletingId);
-    toast.success("Expense deleted!");
+
+    // Optimistic update — remove from UI immediately
+    setExpenses((prev) => prev.filter((e) => e.id !== deletingId));
     setDeletingId(null);
+
+    const result = await deleteExpense(deletingId);
+    if (result?.error) {
+      toast.error("Failed to delete. Please refresh.");
+      // Refetch only if it failed
+      fetchAll();
+    } else {
+      toast.success("Expense deleted!");
+    }
     setDeleteLoading(false);
-    fetchAll();
   };
 
   return (
@@ -223,7 +233,10 @@ export default function DashboardPage() {
 
       <ExpenseFormDialog
         open={showForm}
-        onClose={() => { setShowForm(false); fetchAll(); }}
+        onClose={(changed) => {
+          setShowForm(false);
+          if (changed) fetchAll();
+        }}
         expense={editingExpense}
       />
       <ConfirmModal
