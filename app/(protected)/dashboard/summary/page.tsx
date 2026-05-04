@@ -291,6 +291,7 @@ export default function SummaryPage() {
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={barData} barSize={48}>
+                <defs/>
                   <XAxis
                     dataKey="name"
                     tick={{ fill: "#94a3b8", fontSize: 12 }}
@@ -306,18 +307,25 @@ export default function SummaryPage() {
                     }
                   />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1e293b",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "12px",
-                      color: "#fff",
-                    }}
-                    formatter={(value) => [
-                      `${symbol}${Number(value).toLocaleString()}`,
-                      "",
-                    ]}
-                  />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                  contentStyle={{
+                    backgroundColor: "rgba(0,0,0,0.9)",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    borderRadius: "12px",
+                    color: "#fff",
+                  }}
+                  itemStyle={{ color: "#fff" }}
+                  labelStyle={{ color: "#fff" }}
+                  cursor={{
+                    fill: "transparent",
+                    stroke: "rgba(255,255,255,0.2)",
+                    strokeWidth: 1,
+                  }}
+                  formatter={(value) => [
+                    `${symbol}${Number(value).toLocaleString()}`,
+                    "",
+                  ]}
+                />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} cursor="default">
                     {barData.map((entry, i) => (
                       <Cell key={i} fill={entry.fill} />
                     ))}
@@ -352,17 +360,24 @@ export default function SummaryPage() {
                     }
                   />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1e293b",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "12px",
-                      color: "#fff",
-                    }}
-                    formatter={(value) => [
-                      `${symbol}${Number(value).toLocaleString()}`,
-                      "",
-                    ]}
-                  />
+                  contentStyle={{
+                    backgroundColor: "rgba(0,0,0,0.9)",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    borderRadius: "12px",
+                    color: "#fff",
+                  }}
+                  itemStyle={{ color: "#fff" }}
+                  labelStyle={{ color: "#fff" }}
+                  cursor={{
+                    fill: "transparent",
+                    stroke: "rgba(255,255,255,0.2)",
+                    strokeWidth: 1,
+                  }}
+                  formatter={(value) => [
+                    `${symbol}${Number(value).toLocaleString()}`,
+                    "",
+                  ]}
+                />
                   {isFreelancer && (
                     <Line
                       type="monotone"
@@ -411,17 +426,24 @@ export default function SummaryPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1e293b",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "12px",
-                      color: "#fff",
-                    }}
-                    formatter={(value) => [
-                      `${symbol}${Number(value).toLocaleString()}`,
-                      "",
-                    ]}
-                  />
+                  contentStyle={{
+                    backgroundColor: "rgba(0,0,0,0.9)",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    borderRadius: "12px",
+                    color: "#fff",
+                  }}
+                  itemStyle={{ color: "#fff" }}
+                  labelStyle={{ color: "#fff" }}
+                  cursor={{
+                    fill: "transparent",
+                    stroke: "rgba(255,255,255,0.2)",
+                    strokeWidth: 1,
+                  }}
+                  formatter={(value) => [
+                    `${symbol}${Number(value).toLocaleString()}`,
+                    "",
+                  ]}
+                />
                   <Legend
                     formatter={(value) => (
                       <span style={{ color: "#94a3b8", fontSize: "12px" }}>

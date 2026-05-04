@@ -95,7 +95,7 @@ export default function EditIncomeModal({ open, onClose, currency }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => onClose(false)} />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl">
+      <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-black/90 p-6 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-white">Edit Income</h2>
@@ -122,13 +122,13 @@ export default function EditIncomeModal({ open, onClose, currency }: Props) {
               </Label>
               <Input
                 placeholder="Source name e.g. Salary"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
                 {...register("primaryIncome.sourceName", { required: true })}
               />
               <Input
                 type="number"
                 placeholder="Amount"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
                 {...register("primaryIncome.amount", { required: true, min: 1 })}
               />
             </div>
@@ -144,13 +144,13 @@ export default function EditIncomeModal({ open, onClose, currency }: Props) {
                     <div className="flex-1 space-y-2">
                       <Input
                         placeholder="Source name"
-                        className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+                        className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
                         {...register(`secondaryIncomes.${index}.sourceName`)}
                       />
                       <Input
                         type="number"
                         placeholder="Amount"
-                        className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+                        className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
                         {...register(`secondaryIncomes.${index}.amount`)}
                       />
                     </div>
