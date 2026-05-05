@@ -71,7 +71,7 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
           {/* Top Row */}
           <div className="flex h-16 items-center justify-between">
             {/* Left — Logo + Username */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-1">
               <img
                 src="/favicon.png"
                 alt="MoneyFlow"
@@ -88,12 +88,12 @@ export default function Navbar({ username, email, image, incomeType }: NavbarPro
             </div>
 
             {/* Center — Month Selector (mobile only) */}
-            <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
+            <div className="flex md:hidden justify-center flex-1">
               <MonthSelector />
             </div>
 
             {/* Right — Desktop Nav + Profile */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-1 justify-end">
               {/* Desktop Nav Tabs */}
               <nav className="hidden md:flex items-center gap-1">
                 {NAV_TABS.map((tab) => {
