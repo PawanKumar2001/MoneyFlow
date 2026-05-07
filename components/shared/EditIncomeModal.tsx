@@ -21,6 +21,15 @@ type FormData = {
   secondaryIncomes: IncomeEntry[];
 };
 
+type IncomeRecord = {
+  id: string;
+  type: string;
+  sourceName: string;
+  amount: number;
+  month?: number | null;
+  year?: number | null;
+};
+
 type Props = {
   open: boolean;
   onClose: (changed?: boolean) => void;
@@ -58,15 +67,15 @@ export default function EditIncomeModal({ open, onClose, currency }: Props) {
     const fetch = async () => {
       setFetching(true);
       const data = await getUserIncome();
-      const primary = data.incomes.find((i) => i.type === "PRIMARY");
-      const secondary = data.incomes.filter((i) => i.type === "SECONDARY");
+      const primary = data.incomes.find((i: IncomeRecord) => i.type === "PRIMARY");
+      const secondary = data.incomes.filter((i: IncomeRecord) => i.type === "SECONDARY");
       reset({
         primaryIncome: {
           id: primary?.id,
           sourceName: primary?.sourceName ?? "",
           amount: primary?.amount ?? 0,
         },
-        secondaryIncomes: secondary.map((i) => ({
+        secondaryIncomes: secondary.map((i: IncomeRecord) => ({
           id: i.id,
           sourceName: i.sourceName,
           amount: i.amount,
