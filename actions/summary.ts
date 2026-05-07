@@ -2,12 +2,22 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import {
+  getCache,
+  setCache,
+  cacheKeys,
+  TTL,
+} from "@/lib/redis";
 
 export async function getMonthlySummary(month: number, year: number) {
   const session = await auth();
   if (!session?.user?.id) return null;
 
   const userId = session.user.id;
+  const cacheKey = cacheKeys.summary(userId, month, year);
+
+  const cached = await getCache<any>(cacheKey);
+  if (cached) return cached;
 
   const [expenses, user, subscriptions] = await Promise.all([
     db.expense.findMany({
@@ -25,8 +35,6 @@ export async function getMonthlySummary(month: number, year: number) {
 
   const incomeType = user?.incomeType ?? "SALARIED";
 
-  // For salaried: sum all incomes (no month/year filter)
-  // For freelancer: sum only this month's logged incomes
   let totalIncome = 0;
   if (incomeType === "SALARIED") {
     totalIncome = user?.incomes.reduce((sum, i) => sum + i.amount, 0) ?? 0;
@@ -38,14 +46,16 @@ export async function getMonthlySummary(month: number, year: number) {
   }
 
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const totalSubscriptions = subscriptions.reduce((sum, s) => sum + s.amount, 0);
+  const totalSubscriptions = subscriptions.reduce(
+    (sum, s) => sum + s.amount,
+    0
+  );
   const remaining = totalIncome - totalExpenses;
   const savingsPercent =
     totalIncome > 0
       ? ((remaining / totalIncome) * 100).toFixed(1)
       : "0";
 
-  // Group by category
   const categoryMap: Record<string, number> = {};
   for (const expense of expenses) {
     categoryMap[expense.category] =
@@ -55,7 +65,7 @@ export async function getMonthlySummary(month: number, year: number) {
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
 
-  return {
+  const result = {
     expenses,
     totalIncome,
     totalExpenses,
@@ -66,6 +76,10 @@ export async function getMonthlySummary(month: number, year: number) {
     incomeType,
     currency: user?.currency ?? "INR",
   };
+
+  await setCache(cacheKey, result, TTL.SUMMARY);
+
+  return result;
 }
 
 export async function getMonthlyTrend(month: number, year: number) {
@@ -73,6 +87,11 @@ export async function getMonthlyTrend(month: number, year: number) {
   if (!session?.user?.id) return [];
 
   const userId = session.user.id;
+  const cacheKey = cacheKeys.trend(userId, month, year);
+
+  const cached = await getCache<any[]>(cacheKey);
+  if (cached) return cached;
+
   const user = await db.user.findUnique({ where: { id: userId } });
   const incomeType = user?.incomeType ?? "SALARIED";
   const months = [];
@@ -104,6 +123,8 @@ export async function getMonthlyTrend(month: number, year: number) {
       income,
     });
   }
+
+  await setCache(cacheKey, months, TTL.SUMMARY);
 
   return months;
 }
