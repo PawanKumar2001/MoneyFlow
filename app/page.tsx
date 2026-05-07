@@ -11,7 +11,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="relative z-10 flex flex-col min-h-screen">
+    <div className="relative z-10 flex flex-col min-h-[calc(100vh-69px)]">
       {/* Hero */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 text-center py-10 sm:py-16">
         <div className="w-full max-w-3xl mx-auto">
