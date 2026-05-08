@@ -19,6 +19,9 @@ export const metadata: Metadata = {
     template: "%s | MoneyFlow",
   },
   description: "Know exactly where your money goes.",
+  verification: {
+    google: "MFsbZPPJwxZjnjL0ePj7Ed5AgsBsLteK5mFtHvlBOW0",
+  },
   icons: {
     icon: "/favicon.png",
     shortcut: "/favicon.png",

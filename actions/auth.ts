@@ -42,14 +42,14 @@ export async function registerUser(data: {
   });
 }
 
-export async function loginUser(data: {
-  email: string;
-  password: string;
-}) {
+export async function loginUser(
+  data: { email: string; password: string },
+  skipPassword?: boolean
+) {
   try {
     await signIn("credentials", {
       email: data.email,
-      password: data.password,
+      password: skipPassword ? "__OTP_VERIFIED__" : data.password,
       redirectTo: "/dashboard",
     });
   } catch (error) {

@@ -113,3 +113,16 @@ enum IncomeType {
   PRIMARY
   SECONDARY
 }
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  type      String   // "SIGNUP" | "LOGIN" | "PASSWORD_RESET"
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
