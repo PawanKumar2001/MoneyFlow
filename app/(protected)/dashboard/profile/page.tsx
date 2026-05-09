@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { updateProfile, resetUserSetup } from "@/actions/profile";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { signOut } from "next-auth/react";
 
 type FormData = {
   username: string;
@@ -34,16 +35,17 @@ export default function ProfilePage() {
   };
 
   const handleReset = async () => {
-    setResetLoading(true);
-    const result = await resetUserSetup();
-    if (result?.error) {
-      toast.error(result.error);
-    } else {
-      toast.success("Setup reset! Redirecting...");
-      router.push("/setup");
-    }
+  setResetLoading(true);
+  const result = await resetUserSetup();
+  if (result?.error) {
+    toast.error(result.error);
     setResetLoading(false);
-  };
+    return;
+  }
+  toast.success("Setup reset! Signing you out...");
+  // Force sign out to clear session cache then redirect to setup
+  await signOut({ callbackUrl: "/setup" });
+};
 
   return (
     <div className="flex items-center justify-center px-4 py-8 min-h-[80vh]">
@@ -111,11 +113,10 @@ export default function ProfilePage() {
                 Reset Setup
               </h3>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                This will delete all your income records, deactivate
-                subscriptions, and remove auto-generated expenses. You'll be
-                taken back to the setup screen to start fresh. Manual expenses
-                will remain. Useful if you've switched professions or income
-                type.
+                This will permanently delete all your income, expenses,
+                and subscriptions. You'll be signed out and redirected
+                to the setup screen to start completely fresh. This is
+                useful if you've switched professions or income type.
               </p>
             </div>
           </div>
@@ -136,7 +137,7 @@ export default function ProfilePage() {
                   Are you sure?
                 </p>
                 <p className="text-xs text-slate-400 text-center mt-1">
-                  This cannot be undone. All income data will be deleted.
+                  This cannot be undone. ALL data including expenses will be permanently deleted.
                 </p>
               </div>
               <div className="flex gap-3">
