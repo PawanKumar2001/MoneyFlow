@@ -2,9 +2,8 @@
 
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { signIn, signOut, auth } from "@/lib/auth";
+import { signIn, signOut } from "@/lib/auth";
 import { AuthError } from "next-auth";
-
 
 export async function registerUser(data: {
   username: string;
@@ -37,19 +36,54 @@ export async function registerUser(data: {
   // Auto sign in after registration
   await signIn("credentials", {
     email,
-    password,
+    password: "__OTP_VERIFIED__",
     redirectTo: "/setup",
   });
 }
 
-export async function loginUser(
-  data: { email: string; password: string },
-  skipPassword?: boolean
-) {
+export async function verifyCredentials(data: {
+  email: string;
+  password: string;
+}) {
+  const user = await db.user.findUnique({
+    where: { email: data.email },
+  });
+
+  if (!user || !user.password) {
+    return { error: "Invalid email or password." };
+  }
+
+  const passwordMatch = await bcrypt.compare(data.password, user.password);
+  if (!passwordMatch) {
+    return { error: "Invalid email or password." };
+  }
+
+  return { success: true };
+}
+
+export async function completeLogin(email: string) {
+  try {
+    await signIn("credentials", {
+      email,
+      password: "__OTP_VERIFIED__",
+      redirectTo: "/dashboard",
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { error: "Something went wrong." };
+    }
+    throw error;
+  }
+}
+
+export async function loginUser(data: {
+  email: string;
+  password: string;
+}) {
   try {
     await signIn("credentials", {
       email: data.email,
-      password: skipPassword ? "__OTP_VERIFIED__" : data.password,
+      password: data.password,
       redirectTo: "/dashboard",
     });
   } catch (error) {
@@ -65,15 +99,11 @@ export async function loginUser(
   }
 }
 
-export async function logoutUser() {
-  await signOut({ redirectTo: "/login" });
-}
-
 export async function setUsername(username: string) {
+  const { auth } = await import("@/lib/auth");
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 
-  // Check if username is taken
   const existing = await db.user.findUnique({ where: { username } });
   if (existing) return { error: "Username already taken." };
 
@@ -83,4 +113,8 @@ export async function setUsername(username: string) {
   });
 
   return { success: true };
+}
+
+export async function logoutUser() {
+  await signOut({ redirectTo: "/login" });
 }

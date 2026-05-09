@@ -44,10 +44,12 @@ export async function sendOTPEmail(
 
             <!-- Logo -->
             <div style="text-align:center;margin-bottom:32px;">
-              <div style="display:inline-flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;background:#ffffff;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;color:#000000;">M</div>
-                <span style="font-size:24px;font-weight:700;color:#ffffff;">MoneyFlow</span>
-              </div>
+              <h1 style="color:#ffffff;font-size:28px;font-weight:800;margin:0;letter-spacing:-0.5px;">
+                MoneyFlow
+              </h1>
+              <p style="color:#475569;font-size:12px;margin:4px 0 0 0;">
+                Know exactly where your money goes.
+              </p>
             </div>
 
             <!-- Card -->
@@ -108,10 +110,12 @@ export async function sendPasswordResetEmail(
 
             <!-- Logo -->
             <div style="text-align:center;margin-bottom:32px;">
-              <div style="display:inline-flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;background:#ffffff;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;color:#000000;">M</div>
-                <span style="font-size:24px;font-weight:700;color:#ffffff;">MoneyFlow</span>
-              </div>
+              <h1 style="color:#ffffff;font-size:28px;font-weight:800;margin:0;letter-spacing:-0.5px;">
+                MoneyFlow
+              </h1>
+              <p style="color:#475569;font-size:12px;margin:4px 0 0 0;">
+                Know exactly where your money goes.
+              </p>
             </div>
 
             <!-- Card -->
@@ -188,10 +192,12 @@ export async function sendMonthlySummaryEmail(
 
             <!-- Logo -->
             <div style="text-align:center;margin-bottom:32px;">
-              <div style="display:inline-flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;background:#ffffff;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;color:#000000;">M</div>
-                <span style="font-size:24px;font-weight:700;color:#ffffff;">MoneyFlow</span>
-              </div>
+              <h1 style="color:#ffffff;font-size:28px;font-weight:800;margin:0;letter-spacing:-0.5px;">
+                MoneyFlow
+              </h1>
+              <p style="color:#475569;font-size:12px;margin:4px 0 0 0;">
+                Know exactly where your money goes.
+              </p>
             </div>
 
             <!-- Card -->

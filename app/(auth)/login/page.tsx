@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { loginUser } from "@/actions/auth";
+import { verifyCredentials, completeLogin } from "@/actions/auth";
 import { sendOTP, verifyOTP } from "@/actions/otp";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -35,15 +35,15 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    // First verify credentials
-    const result = await loginUser(data);
+    // Step 1 — verify credentials only, no sign in yet
+    const result = await verifyCredentials(data);
     if (result?.error) {
       setError(result.error);
       setLoading(false);
       return;
     }
 
-    // Credentials valid — send OTP
+    // Step 2 — send OTP
     try {
       await sendOTP(data.email, "LOGIN");
       setEmail(data.email);
@@ -59,6 +59,7 @@ export default function LoginPage() {
     setOtpLoading(true);
     setError(null);
 
+    // Verify OTP
     const verification = await verifyOTP(email, code, "LOGIN");
     if (!verification.success) {
       setError(verification.error ?? "Invalid code.");
@@ -66,8 +67,8 @@ export default function LoginPage() {
       return;
     }
 
-    // OTP verified — complete login
-    await loginUser({ email, password: "" }, true);
+    // Complete login after OTP verified
+    await completeLogin(email);
     setOtpLoading(false);
   };
 
@@ -105,7 +106,9 @@ export default function LoginPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <h1 className="text-2xl font-bold text-white">Welcome back</h1>
+                <h1 className="text-2xl font-bold text-white">
+                  Welcome back
+                </h1>
                 <p className="text-sm text-slate-400 mt-1">
                   Sign in to MoneyFlow
                 </p>
@@ -121,7 +124,7 @@ export default function LoginPage() {
                   Check your email
                 </h1>
                 <p className="text-sm text-slate-400 mt-1">
-                  We sent a code to{" "}
+                  We sent a 6-digit code to{" "}
                   <span className="text-white font-medium">{email}</span>
                 </p>
               </motion.div>
@@ -131,6 +134,7 @@ export default function LoginPage() {
 
         <CardContent className="px-4 sm:px-8 pb-6 sm:pb-8 pt-4">
           <AnimatePresence mode="wait">
+
             {/* Step 1 — Login Form */}
             {step === "form" && (
               <motion.div
@@ -164,10 +168,7 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                <form
-                  onSubmit={handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div className="space-y-1.5">
                     <Label className="text-slate-300">Email</Label>
                     <Input
@@ -319,4 +320,4 @@ function GoogleIcon() {
       />
     </svg>
   );
-} 
+}
