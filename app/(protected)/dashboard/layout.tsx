@@ -37,9 +37,14 @@ export default async function DashboardLayout({
         position="bottom-right"
         toastOptions={{
           style: {
-            background: "#1e293b",
-            border: "1px solid rgba(255,255,255,0.1)",
-            color: "#fff",
+            background: "#000000",
+            border: "1px solid rgba(255,255,255,0.15)",
+            color: "#ffffff",
+          },
+          classNames: {
+            success: "!border-white/20",
+            error: "!border-red-500/30",
+            warning: "!border-yellow-500/30",
           },
         }}
       />
