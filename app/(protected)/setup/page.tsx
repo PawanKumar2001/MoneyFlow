@@ -24,6 +24,7 @@ export default function SetupPage() {
   const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
   const STEPS = incomeType === "SALARIED"
     ? ["Currency", "Primary Income", "Secondary Income", "Review"]
@@ -71,7 +72,10 @@ export default function SetupPage() {
     if (result?.error) {
       setError(result.error);
       setLoading(false);
+      return;
     }
+    setCompleted(true);
+    setLoading(false);
   };
 
   // Income Type Selection Screen
@@ -483,8 +487,8 @@ export default function SetupPage() {
                       )}
 
                       {/* Email Summary Toggle */}
-                      <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
-                        <div>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                        <div className="flex-1">
                           <p className="text-sm text-white font-medium">
                             Monthly Summary Email
                           </p>
@@ -492,14 +496,14 @@ export default function SetupPage() {
                             Get a summary email on the 1st of every month
                           </p>
                         </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
                           <input
                             type="checkbox"
                             className="sr-only peer"
                             {...register("emailSummary")}
                             defaultChecked
                           />
-                          <div className="w-10 h-5 bg-white/10 peer-checked:bg-white rounded-full transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:peer-checked:bg-black after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
+                          <div className="w-11 h-6 bg-white/10 peer-checked:bg-white/90 rounded-full transition-all duration-300 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:peer-checked:bg-black after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-5" />
                         </label>
                       </div>
                     </div>
@@ -511,7 +515,42 @@ export default function SetupPage() {
                 )}
               </AnimatePresence>
 
-              {/* Navigation Buttons */}
+              {/* Completion Screen */}
+              {completed && (
+                <motion.div
+                  key="complete"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center space-y-6 py-4"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                    className="text-6xl mx-auto"
+                  >
+                    🎉
+                  </motion.div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white mb-2">
+                      You're all set!
+                    </h2>
+                    <p className="text-sm text-slate-400">
+                      MoneyFlow is ready to help you track your finances.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => window.location.href = "/dashboard"}
+                    className="w-full bg-white hover:bg-white/90 text-black"
+                  >
+                    Go to Dashboard →
+                  </Button>
+                </motion.div>
+              )}
+
+             {/* Navigation Buttons */}
+              {!completed && (
               <div className="flex gap-3 mt-8">
                 {step > 0 && (
                   <Button
@@ -537,10 +576,11 @@ export default function SetupPage() {
                     disabled={loading}
                     className="flex-1 bg-white hover:bg-white/90 text-black"
                   >
-                    {loading ? "Setting up..." : "Launch MoneyFlow 🚀"}
+                    {loading ? "Setting up..." : "Confirm Setup 🚀"}
                   </Button>
                 )}
               </div>
+              )}
             </form>
           </div>
         </div>

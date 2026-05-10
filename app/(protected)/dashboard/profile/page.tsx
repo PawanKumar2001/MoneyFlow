@@ -90,24 +90,25 @@ export default function ProfilePage() {
             </div>
 
             {/* Email Summary Toggle */}
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
-              <div>
-                <p className="text-sm font-medium text-white">
-                  Monthly Summary Email
-                </p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Receive a summary on the 1st of every month
-                </p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  {...register("emailSummary")}
-                />
-                <div className="w-10 h-5 bg-white/10 peer-checked:bg-white rounded-full transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:peer-checked:bg-black after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
-              </label>
-            </div>
+           <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                        <div className="flex-1">
+                          <p className="text-sm text-white font-medium">
+                            Monthly Summary Email
+                          </p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            Get a summary email on the 1st of every month
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            {...register("emailSummary")}
+                            defaultChecked
+                          />
+                          <div className="w-11 h-6 bg-white/10 peer-checked:bg-white/90 rounded-full transition-all duration-300 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:peer-checked:bg-black after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-5" />
+                        </label>
+                      </div>
 
             <div className="flex gap-3 pt-2">
               <Button

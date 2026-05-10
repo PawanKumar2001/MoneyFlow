@@ -60,5 +60,5 @@ export async function completeSetup(data: SetupData) {
     }
   }
 
-  redirect("/dashboard");
+  return { success: true };
 }
