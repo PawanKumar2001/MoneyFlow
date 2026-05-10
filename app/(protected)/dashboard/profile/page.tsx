@@ -53,7 +53,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex items-center justify-center px-4 py-8 min-h-[80vh]">
-      <div className="w-full max-w-lg mt-4 md:mt-0 md:my-auto">
+      <div className="w-full max-w-lg">
         {/* Back Button */}
         <button
           onClick={() => router.back()}
