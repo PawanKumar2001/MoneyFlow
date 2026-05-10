@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { updateCredentials } from "@/actions/profile";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import PasswordInput from "@/components/shared/PasswordInput";
 
 type FormData = {
   currentPassword: string;
@@ -65,10 +66,9 @@ export default function CredentialsPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-1.5">
               <Label className="text-slate-300 text-sm">Current Password</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 placeholder="••••••••"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500 h-11"
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 pr-10"
                 {...register("currentPassword", { required: "Current password is required" })}
               />
               {errors.currentPassword && (
@@ -78,10 +78,9 @@ export default function CredentialsPage() {
 
             <div className="space-y-1.5">
               <Label className="text-slate-300 text-sm">New Password</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 placeholder="••••••••"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500 h-11"
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 pr-10"
                 {...register("newPassword", {
                   required: "New password is required",
                   minLength: { value: 8, message: "Minimum 8 characters" },
@@ -94,10 +93,9 @@ export default function CredentialsPage() {
 
             <div className="space-y-1.5">
               <Label className="text-slate-300 text-sm">Confirm New Password</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 placeholder="••••••••"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500 h-11"
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 pr-10"
                 {...register("confirmPassword", {
                   required: "Please confirm your password",
                   validate: (v) => v === newPassword || "Passwords do not match",

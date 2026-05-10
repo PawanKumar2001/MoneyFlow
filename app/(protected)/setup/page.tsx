@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 
 type FormData = {
   currency: string;
+  emailSummary: boolean;
   primaryIncome: { sourceName: string; amount: number };
   secondaryIncomes: { sourceName: string; amount: number }[];
 };
@@ -24,8 +25,6 @@ export default function SetupPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const now = new Date();
-
   const STEPS = incomeType === "SALARIED"
     ? ["Currency", "Primary Income", "Secondary Income", "Review"]
     : ["Currency", "Review"];
@@ -34,6 +33,7 @@ export default function SetupPage() {
     useForm<FormData>({
       defaultValues: {
         currency: "INR",
+        emailSummary: true,
         primaryIncome: { sourceName: "", amount: 0 },
         secondaryIncomes: [],
       },
@@ -64,6 +64,7 @@ export default function SetupPage() {
     const result = await completeSetup({
       incomeType: incomeType!,
       currency: data.currency,
+      emailSummary: data.emailSummary,
       primaryIncome: incomeType === "SALARIED" ? data.primaryIncome : undefined,
       secondaryIncomes: incomeType === "SALARIED" ? data.secondaryIncomes : undefined,
     });
@@ -76,14 +77,14 @@ export default function SetupPage() {
   // Income Type Selection Screen
   if (!incomeType) {
     return (
-      <div className="relative z-10 flex min-h-[calc(100vh-69px)] flex items-center justify-center p-4">
+      <div className="relative z-10 min-h-[calc(100vh-69px)] flex items-center justify-center p-4">
         <div className="w-full max-w-2xl">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-10"
           >
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg shadow-white/20">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg">
               <span className="text-2xl">💸</span>
             </div>
             <h1 className="text-3xl font-bold text-white">
@@ -101,15 +102,12 @@ export default function SetupPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
               onClick={() => setIncomeType("SALARIED")}
-              className="group relative p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300 text-left"
+              className="group relative p-6 md:p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 transition-all duration-300 text-left"
             >
               <div className="text-4xl mb-4">💼</div>
-              <h2 className="text-xl font-bold text-white mb-2">
-                Salaried
-              </h2>
+              <h2 className="text-xl font-bold text-white mb-2">Salaried</h2>
               <p className="text-sm text-slate-400 leading-relaxed">
-                I receive a fixed salary every month from an employer or
-                business.
+                I receive a fixed salary every month from an employer or business.
               </p>
               <ul className="mt-4 space-y-1.5">
                 {[
@@ -117,20 +115,12 @@ export default function SetupPage() {
                   "Track expenses vs salary",
                   "Savings percentage",
                 ].map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center gap-2 text-xs text-slate-400"
-                  >
-                    <span className="text-emerald-400">✓</span>
+                  <li key={item} className="flex items-center gap-2 text-xs text-slate-400">
+                    <span className="text-white">✓</span>
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="h-6 w-6 rounded-full bg-indigo-500 flex items-center justify-center">
-                  <span className="text-white text-xs">→</span>
-                </div>
-              </div>
             </motion.button>
 
             {/* Freelancer */}
@@ -139,15 +129,14 @@ export default function SetupPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
               onClick={() => setIncomeType("FREELANCER")}
-              className="group relative p-4 sm:p-6 md:p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300 text-left"
+              className="group relative p-6 md:p-8 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 transition-all duration-300 text-left"
             >
               <div className="text-4xl mb-4">💰</div>
               <h2 className="text-xl font-bold text-white mb-2">
                 Freelancer / Business
               </h2>
               <p className="text-sm text-slate-400 leading-relaxed">
-                My income varies each month from clients, projects, or my
-                own business.
+                My income varies each month from clients, projects, or my own business.
               </p>
               <ul className="mt-4 space-y-1.5">
                 {[
@@ -155,20 +144,12 @@ export default function SetupPage() {
                   "Log earnings per month",
                   "Track income trends",
                 ].map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center gap-2 text-xs text-slate-400"
-                  >
-                    <span className="text-emerald-400">✓</span>
+                  <li key={item} className="flex items-center gap-2 text-xs text-slate-400">
+                    <span className="text-white">✓</span>
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="h-6 w-6 rounded-full bg-emerald-500 flex items-center justify-center">
-                  <span className="text-white text-xs">→</span>
-                </div>
-              </div>
             </motion.button>
           </div>
         </div>
@@ -178,7 +159,7 @@ export default function SetupPage() {
 
   // Step-based Setup Form
   return (
-    <div className="relative z-10 flex min-h-[calc(100vh-69px)] flex items-center justify-center p-4">
+    <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-sm sm:max-w-lg">
         {/* Header */}
         <motion.div
@@ -186,7 +167,7 @@ export default function SetupPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg shadow-white/20">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg">
             <span className="text-2xl">
               {incomeType === "SALARIED" ? "💼" : "💰"}
             </span>
@@ -196,14 +177,14 @@ export default function SetupPage() {
           </h1>
         </motion.div>
 
-        {/* Back to income type selection */}
+        {/* Back + Step Counter */}
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => { setIncomeType(null); setStep(0); }}
             className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
-            Go Back
+            Change income type
           </button>
           <span className="text-xs text-slate-500">
             Step {step + 1} of {STEPS.length}
@@ -211,26 +192,25 @@ export default function SetupPage() {
         </div>
 
         {/* Step Indicators */}
-        <div className="flex items-center justify-center gap-2 mb-8"></div>
-        
-        {/* Step Indicators */}
         <div className="flex items-center justify-center gap-2 mb-8">
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${i < step
-                  ? "bg-emerald-500 text-white"
-                  : i === step
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30"
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 ${
+                  i < step
+                    ? "bg-white text-black"
+                    : i === step
+                    ? "bg-white text-black shadow-lg"
                     : "bg-white/10 text-slate-500"
-                  }`}
+                }`}
               >
                 {i < step ? "✓" : i + 1}
               </div>
               {i < STEPS.length - 1 && (
                 <div
-                  className={`h-px w-8 transition-all duration-500 ${i < step ? "bg-emerald-500" : "bg-white/10"
-                    }`}
+                  className={`h-px w-8 transition-all duration-500 ${
+                    i < step ? "bg-white" : "bg-white/10"
+                  }`}
                 />
               )}
             </div>
@@ -260,39 +240,27 @@ export default function SetupPage() {
                       <p className="text-sm text-slate-400">
                         This will be used across the app
                       </p>
-                      <p className="text-xs text-red-400 leading-relaxed">
-                        The currency can only be set once or changed by resetting your setup.
-                      </p>
                     </div>
-                    <div className="relative w-full">
-                      <select
-                        className="w-full appearance-none px-3 pr-10 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500 cursor-pointer"
-                        defaultValue="INR"
-                        onChange={(e) => setValue("currency", e.target.value)}
-                      >
-                        {CURRENCIES.map((c) => (
-                          <option
-                            key={c.code}
-                            value={c.code}
-                            className="bg-black"
-                          >
-                            {c.symbol} — {c.name} ({c.code})
-                          </option>
-                        ))}
-                      </select>
-
-                      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
-                      </div>
-                    </div>
+                    <select
+                      className="w-full px-3 py-2.5 rounded-lg bg-black/80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50"
+                      defaultValue="INR"
+                      onChange={(e) => setValue("currency", e.target.value)}
+                    >
+                      {CURRENCIES.map((c) => (
+                        <option key={c.code} value={c.code} className="bg-black">
+                          {c.symbol} — {c.name} ({c.code})
+                        </option>
+                      ))}
+                    </select>
 
                     {/* Freelancer info box */}
                     {incomeType === "FREELANCER" && (
                       <motion.div
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10"
+                        className="p-4 rounded-xl border border-white/20 bg-white/5"
                       >
-                        <p className="text-sm text-emerald-300 font-medium mb-1">
+                        <p className="text-sm text-white font-medium mb-1">
                           💰 Freelancer Mode
                         </p>
                         <p className="text-xs text-slate-400">
@@ -326,8 +294,8 @@ export default function SetupPage() {
                       <div className="space-y-1.5">
                         <Label className="text-slate-300">Income Source</Label>
                         <Input
-                          placeholder="e.g. Salary, Pension"
-                          className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+                          placeholder="e.g. Salary, Freelance"
+                          className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
                           {...register("primaryIncome.sourceName", {
                             required: "Source name is required",
                           })}
@@ -341,13 +309,10 @@ export default function SetupPage() {
                           type="number"
                           step="0.01"
                           placeholder="0.00"
-                          className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+                          className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
                           {...register("primaryIncome.amount", {
                             required: "Amount is required",
                             min: { value: 0.01, message: "Must be greater than 0" },
-                            validate: (v) =>
-                              /^\d+(\.\d{1,2})?$/.test(String(v)) ||
-                              "Max 2 decimal places allowed",
                           })}
                         />
                       </div>
@@ -386,14 +351,14 @@ export default function SetupPage() {
                             <div className="flex-1 space-y-2">
                               <Input
                                 placeholder="Source name"
-                                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+                                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
                                 {...register(`secondaryIncomes.${index}.sourceName`)}
                               />
                               <Input
                                 type="number"
                                 step="0.01"
-                                placeholder="Amount"
-                                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500"
+                                placeholder="0.00"
+                                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
                                 {...register(`secondaryIncomes.${index}.amount`)}
                               />
                             </div>
@@ -447,13 +412,9 @@ export default function SetupPage() {
                     <div className="space-y-3">
                       {/* Income Type */}
                       <div className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/10">
-                        <span className="text-slate-400 text-sm">
-                          Income Type
-                        </span>
+                        <span className="text-slate-400 text-sm">Income Type</span>
                         <span className="text-white font-medium">
-                          {incomeType === "SALARIED"
-                            ? "💼 Salaried"
-                            : "💰 Freelancer"}
+                          {incomeType === "SALARIED" ? "💼 Salaried" : "💰 Freelancer"}
                         </span>
                       </div>
 
@@ -470,14 +431,11 @@ export default function SetupPage() {
                         <>
                           <div className="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/10">
                             <span className="text-slate-400 text-sm">
-                              {watchedData.primaryIncome?.sourceName ||
-                                "Primary Income"}
+                              {watchedData.primaryIncome?.sourceName || "Primary Income"}
                             </span>
-                            <span className="text-emerald-400 font-medium">
+                            <span className="text-white font-medium">
                               {selectedCurrency?.symbol}
-                              {Number(
-                                watchedData.primaryIncome?.amount || 0
-                              ).toLocaleString()}
+                              {Number(watchedData.primaryIncome?.amount || 0).toLocaleString()}
                             </span>
                           </div>
 
@@ -490,7 +448,7 @@ export default function SetupPage() {
                                 <span className="text-slate-400 text-sm">
                                   {inc.sourceName}
                                 </span>
-                                <span className="text-emerald-400 font-medium">
+                                <span className="text-white font-medium">
                                   {selectedCurrency?.symbol}
                                   {Number(inc.amount || 0).toLocaleString()}
                                 </span>
@@ -498,11 +456,11 @@ export default function SetupPage() {
                             ) : null
                           )}
 
-                          <div className="flex justify-between items-center p-3 rounded-xl bg-indigo-600/20 border border-indigo-500/30">
+                          <div className="flex justify-between items-center p-3 rounded-xl bg-white/10 border border-white/20">
                             <span className="text-white font-semibold">
                               Total Monthly Income
                             </span>
-                            <span className="text-indigo-300 font-bold text-lg">
+                            <span className="text-white font-bold text-lg">
                               {selectedCurrency?.symbol}
                               {totalIncome.toLocaleString()}
                             </span>
@@ -512,8 +470,8 @@ export default function SetupPage() {
 
                       {/* Freelancer info */}
                       {incomeType === "FREELANCER" && (
-                        <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10">
-                          <p className="text-sm text-emerald-300 font-medium mb-1">
+                        <div className="p-4 rounded-xl border border-white/20 bg-white/5">
+                          <p className="text-sm text-white font-medium mb-1">
                             Ready to go!
                           </p>
                           <p className="text-xs text-slate-400">
@@ -523,12 +481,31 @@ export default function SetupPage() {
                           </p>
                         </div>
                       )}
+
+                      {/* Email Summary Toggle */}
+                      <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
+                        <div>
+                          <p className="text-sm text-white font-medium">
+                            Monthly Summary Email
+                          </p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            Get a summary email on the 1st of every month
+                          </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            {...register("emailSummary")}
+                            defaultChecked
+                          />
+                          <div className="w-10 h-5 bg-white/10 peer-checked:bg-white rounded-full transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:peer-checked:bg-black after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
+                        </label>
+                      </div>
                     </div>
 
                     {error && (
-                      <p className="text-sm text-red-400 text-center">
-                        {error}
-                      </p>
+                      <p className="text-sm text-red-400 text-center">{error}</p>
                     )}
                   </motion.div>
                 )}
@@ -558,7 +535,7 @@ export default function SetupPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-white hover:bg-white/90 text-black shadow-lg shadow-emerald-500/20"
+                    className="flex-1 bg-white hover:bg-white/90 text-black"
                   >
                     {loading ? "Setting up..." : "Launch MoneyFlow 🚀"}
                   </Button>

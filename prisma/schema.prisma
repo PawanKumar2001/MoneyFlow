@@ -26,6 +26,7 @@ model User {
   incomes       Income[]
   expenses      Expense[]
   subscriptions Subscription[]
+  emailSummary  Boolean  @default(true)
 }
 
 model Account {

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import OTPInput from "@/components/shared/OTPInput";
+import PasswordInput from "@/components/shared/PasswordInput";
 
 type LoginFormData = {
   email: string;
@@ -196,13 +197,10 @@ export default function LoginPage() {
                         Forgot password?
                       </Link>
                     </div>
-                    <Input
-                      type="password"
+                    <PasswordInput
                       placeholder="••••••••"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
-                      {...register("password", {
-                        required: "Password is required",
-                      })}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 pr-10"
+                      {...register("password", { required: "Password is required" })}
                     />
                     {errors.password && (
                       <p className="text-xs text-red-400">

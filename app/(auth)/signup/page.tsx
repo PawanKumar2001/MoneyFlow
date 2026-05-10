@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import OTPInput from "@/components/shared/OTPInput";
+import PasswordInput from "@/components/shared/PasswordInput";
 
 type SignupFormData = {
   username: string;
@@ -210,17 +211,10 @@ export default function SignupPage() {
 
                   <div className="space-y-1.5">
                     <Label className="text-slate-300">Password</Label>
-                    <Input
-                      type="password"
+                    <PasswordInput
                       placeholder="••••••••"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
-                      {...register("password", {
-                        required: "Password is required",
-                        minLength: {
-                          value: 8,
-                          message: "Minimum 8 characters",
-                        },
-                      })}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 pr-10"
+                      {...register("password", { required: "Password is required" })}
                     />
                     {errors.password && (
                       <p className="text-xs text-red-400">
@@ -231,15 +225,10 @@ export default function SignupPage() {
 
                   <div className="space-y-1.5">
                     <Label className="text-slate-300">Confirm Password</Label>
-                    <Input
-                      type="password"
+                    <PasswordInput
                       placeholder="••••••••"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
-                      {...register("confirmPassword", {
-                        required: "Please confirm your password",
-                        validate: (value) =>
-                          value === password || "Passwords do not match",
-                      })}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 pr-10"
+                      {...register("password", { required: "Password is required" })}
                     />
                     {errors.confirmPassword && (
                       <p className="text-xs text-red-400">

@@ -7,6 +7,7 @@ import { deleteCachePattern, deleteCache, cacheKeys } from "@/lib/redis";
 
 export async function updateProfile(data: {
   username: string;
+  emailSummary: boolean;
 }) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
@@ -22,7 +23,10 @@ export async function updateProfile(data: {
 
   await db.user.update({
     where: { id: session.user.id },
-    data: { username: data.username },
+    data: {
+      username: data.username,
+      emailSummary: data.emailSummary,
+    },
   });
 
   return { success: true };

@@ -28,7 +28,10 @@ export async function GET(req: NextRequest) {
 
     // Get all users
     const users = await db.user.findMany({
-      where: { isSetupDone: true },
+      where: {
+        isSetupDone: true,
+        emailSummary: true,
+      },
       include: { incomes: true },
     });
 
