@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,11 @@ import { updateProfile, resetUserSetup } from "@/actions/profile";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
+import { db } from "@/lib/db";
 
 type FormData = {
   username: string;
+  emailSummary: boolean;
 };
 
 export default function ProfilePage() {
@@ -21,7 +23,10 @@ export default function ProfilePage() {
   const [resetLoading, setResetLoading] = useState(false);
   const router = useRouter();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
+  const { register, handleSubmit, setValue, formState: { errors } } =
+    useForm<FormData>({
+      defaultValues: { emailSummary: true },
+    });
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -35,21 +40,20 @@ export default function ProfilePage() {
   };
 
   const handleReset = async () => {
-  setResetLoading(true);
-  const result = await resetUserSetup();
-  if (result?.error) {
-    toast.error(result.error);
-    setResetLoading(false);
-    return;
-  }
-  toast.success("Setup reset! Signing you out...");
-  // Force sign out to clear session cache then redirect to setup
-  await signOut({ callbackUrl: "/setup" });
-};
+    setResetLoading(true);
+    const result = await resetUserSetup();
+    if (result?.error) {
+      toast.error(result.error);
+      setResetLoading(false);
+      return;
+    }
+    toast.success("Setup reset! Signing you out...");
+    await signOut({ callbackUrl: "/setup" });
+  };
 
   return (
     <div className="flex items-center justify-center px-4 py-8 min-h-[80vh]">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-lg mt-4 md:mt-0 md:my-auto">
         {/* Back Button */}
         <button
           onClick={() => router.back()}
@@ -62,7 +66,7 @@ export default function ProfilePage() {
         {/* Profile Card */}
         <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 space-y-6">
           <div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-white/20 mb-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white mb-4">
               <span className="text-xl">👤</span>
             </div>
             <h2 className="text-2xl font-bold text-white">Profile Settings</h2>
@@ -72,16 +76,37 @@ export default function ProfilePage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Username */}
             <div className="space-y-1.5">
               <Label className="text-slate-300 text-sm">Username</Label>
               <Input
                 placeholder="Your username"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500 h-11"
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 h-11"
                 {...register("username", { required: "Username is required" })}
               />
               {errors.username && (
                 <p className="text-xs text-red-400">{errors.username.message}</p>
               )}
+            </div>
+
+            {/* Email Summary Toggle */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+              <div>
+                <p className="text-sm font-medium text-white">
+                  Monthly Summary Email
+                </p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Receive a summary on the 1st of every month
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  {...register("emailSummary")}
+                />
+                <div className="w-10 h-5 bg-white/10 peer-checked:bg-white rounded-full transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:peer-checked:bg-black after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
+              </label>
             </div>
 
             <div className="flex gap-3 pt-2">
@@ -109,14 +134,11 @@ export default function ProfilePage() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-semibold text-red-400">
-                Reset Setup
-              </h3>
+              <h3 className="text-sm font-semibold text-red-400">Reset Setup</h3>
               <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                This will permanently delete all your income, expenses,
-                and subscriptions. You'll be signed out and redirected
-                to the setup screen to start completely fresh. This is
-                useful if you've switched professions or income type.
+                This will permanently delete all your income, expenses, and
+                subscriptions. You'll be signed out and redirected to the setup
+                screen to start completely fresh.
               </p>
             </div>
           </div>
@@ -134,10 +156,10 @@ export default function ProfilePage() {
             <div className="space-y-3">
               <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
                 <p className="text-sm text-red-300 font-medium text-center">
-                  Are you sure?
+                  ⚠️ Are you absolutely sure?
                 </p>
                 <p className="text-xs text-slate-400 text-center mt-1">
-                  This cannot be undone. ALL data including expenses will be permanently deleted.
+                  This cannot be undone. ALL data will be permanently deleted.
                 </p>
               </div>
               <div className="flex gap-3">
