@@ -33,12 +33,7 @@ export default function SetupUsernamePage() {
   };
 
   return (
-    <div className="relative z-10 min-h-screen bg-slate-950 overflow-hidden flex items-center justify-center p-4">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-950 to-emerald-950" />
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-blob" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl animate-blob animation-delay-2000" />
-
+    <div className="relative z-10 min-h-[calc(100vh-69px)] flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -52,7 +47,7 @@ export default function SetupUsernamePage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-500/30"
+              className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg"
             >
               <span className="text-2xl">👋</span>
             </motion.div>
@@ -67,7 +62,7 @@ export default function SetupUsernamePage() {
               <Label className="text-slate-300">Username</Label>
               <Input
                 placeholder="e.g. johndoe"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-indigo-500 h-11"
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 h-11"
                 {...register("username", {
                   required: "Username is required",
                   minLength: { value: 3, message: "At least 3 characters" },
