@@ -122,7 +122,7 @@ export default function ExpenseFormDialog({ open, onClose, expense }: Props) {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-black/80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 h-10"
+              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 h-10"
             >
               <option value="" className="bg-black">Select Category</option>
               {CATEGORIES.map((cat) => (
