@@ -42,10 +42,10 @@ export async function POST(req: NextRequest) {
     const payload: AuthTokenPayload = {
       userId: user.id,
       email: user.email,
-      username: user.username,
+      username: user.username ?? "",
       incomeType: user.incomeType as "SALARIED" | "FREELANCER",
       isSetupDone: user.isSetupDone,
-      currency: user.currency,
+      currency: user.currency ?? "USD",
     };
 
     // Sign and return JWT — valid for 30 days

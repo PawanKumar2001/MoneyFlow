@@ -78,10 +78,10 @@ export async function POST(req: NextRequest) {
     const newPayload: AuthTokenPayload = {
       userId: user.id,
       email: user.email,
-      username: user.username,
+      username: user.username ?? "",
       incomeType: user.incomeType as "SALARIED" | "FREELANCER",
       isSetupDone: true,
-      currency: user.currency,
+      currency: user.currency ?? "USD",
     };
 
     const newToken = await signMobileToken(newPayload);
@@ -92,9 +92,9 @@ export async function POST(req: NextRequest) {
         id: user.id,
         name: user.name,
         email: user.email,
-        username: user.username,
+        username: user.username ?? "",
         image: user.image,
-        currency: user.currency,
+        currency: user.currency ?? "USD",
         incomeType: user.incomeType,
         isSetupDone: user.isSetupDone,
         emailSummary: user.emailSummary,

@@ -8,7 +8,6 @@ import bcrypt from "bcryptjs";
 import { AuthTokenPayload } from "@/types";
 
 // PATCH /api/mobile/profile
-// Handles: username update, emailSummary toggle, password change
 export async function PATCH(req: NextRequest) {
   try {
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
@@ -45,14 +44,14 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    // Issue fresh token if username changed
+    // Issue fresh token — coerce nullable fields to string with fallback
     const newPayload: AuthTokenPayload = {
       userId: updated.id,
       email: updated.email,
-      username: updated.username,
+      username: updated.username ?? "",
       incomeType: updated.incomeType as "SALARIED" | "FREELANCER",
       isSetupDone: updated.isSetupDone,
-      currency: updated.currency,
+      currency: updated.currency ?? "USD",
     };
     const newToken = await signMobileToken(newPayload);
 
