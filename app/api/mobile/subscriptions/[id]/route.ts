@@ -8,16 +8,17 @@ import { redis } from "@/lib/redis";
 // PATCH /api/mobile/subscriptions/[id]
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = await verifyMobileToken(token);
     if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    const sub = await db.subscription.findUnique({ where: { id: params.id } });
+    const sub = await db.subscription.findUnique({ where: { id } });
     if (!sub || sub.userId !== payload.userId) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -25,7 +26,7 @@ export async function PATCH(
     const { name, amount, recurringDate, startMonth, startYear } = await req.json();
 
     const updated = await db.subscription.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name: name ?? sub.name,
         amount: amount ? parseFloat(amount) : sub.amount,
@@ -45,19 +46,19 @@ export async function PATCH(
 }
 
 // DELETE /api/mobile/subscriptions/[id]
-// Deletes subscription + all current and future auto-generated expenses
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = await verifyMobileToken(token);
     if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    const sub = await db.subscription.findUnique({ where: { id: params.id } });
+    const sub = await db.subscription.findUnique({ where: { id } });
     if (!sub || sub.userId !== payload.userId) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -66,10 +67,9 @@ export async function DELETE(
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
 
-    // Delete current + future auto-generated expenses from this subscription
     await db.expense.deleteMany({
       where: {
-        sourceSubscriptionId: params.id,
+        sourceSubscriptionId: id,
         OR: [
           { year: { gt: currentYear } },
           { year: currentYear, month: { gte: currentMonth } },
@@ -77,9 +77,8 @@ export async function DELETE(
       },
     });
 
-    await db.subscription.delete({ where: { id: params.id } });
+    await db.subscription.delete({ where: { id } });
 
-    // Invalidate caches
     await redis.del(`subscriptions:${payload.userId}`);
     await redis.del(`expenses:${payload.userId}:${currentMonth}:${currentYear}`);
 

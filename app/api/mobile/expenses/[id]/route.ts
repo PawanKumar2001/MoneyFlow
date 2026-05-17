@@ -12,16 +12,17 @@ function cacheKey(userId: string, month: number, year: number) {
 // PATCH /api/mobile/expenses/[id]
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = await verifyMobileToken(token);
     if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    const expense = await db.expense.findUnique({ where: { id: params.id } });
+    const expense = await db.expense.findUnique({ where: { id } });
     if (!expense || expense.userId !== payload.userId) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -39,7 +40,7 @@ export async function PATCH(
     const year = parsedDate.getFullYear();
 
     const updated = await db.expense.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name: name ?? expense.name,
         category: category ?? expense.category,
@@ -50,7 +51,6 @@ export async function PATCH(
       },
     });
 
-    // Invalidate both old and new month cache in case month changed
     await redis.del(cacheKey(payload.userId, expense.month, expense.year));
     await redis.del(cacheKey(payload.userId, month, year));
 
@@ -64,23 +64,22 @@ export async function PATCH(
 // DELETE /api/mobile/expenses/[id]
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = await verifyMobileToken(token);
     if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    const expense = await db.expense.findUnique({ where: { id: params.id } });
+    const expense = await db.expense.findUnique({ where: { id } });
     if (!expense || expense.userId !== payload.userId) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    await db.expense.delete({ where: { id: params.id } });
-
-    // Invalidate cache
+    await db.expense.delete({ where: { id } });
     await redis.del(cacheKey(payload.userId, expense.month, expense.year));
 
     return NextResponse.json({ success: true });
