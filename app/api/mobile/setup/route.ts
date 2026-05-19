@@ -1,4 +1,4 @@
-// Place at: app/api/mobile/setup/route.ts
+// app/api/mobile/setup/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";

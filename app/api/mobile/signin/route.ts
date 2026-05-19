@@ -1,7 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// IMPORTANT: This file belongs in your NEXT.JS project, not the mobile app.
-// Place it at: app/api/mobile/signin/route.ts
-// ─────────────────────────────────────────────────────────────────────────────
+// app/api/mobile/signin/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
