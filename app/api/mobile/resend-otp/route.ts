@@ -2,6 +2,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { sendOTPEmail } from "@/lib/email";
+
+function generateOTP(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,20 +16,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // Invalidate old codes
+    // Delete existing unused codes
     await db.verificationCode.deleteMany({
       where: { email, type: type ?? "LOGIN", used: false },
     });
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = generateOTP();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await db.verificationCode.create({
-      data: { email, code, type: type ?? "LOGIN", expiresAt, attempts: 0, used: false },
+      data: { email, code, type: type ?? "LOGIN", expiresAt },
     });
 
-    // await sendOtpEmail(email, code);
-    console.log(`[DEV] Resend OTP for ${email}: ${code}`);
+    await sendOTPEmail(email, code, type ?? "LOGIN");
 
     return NextResponse.json({ message: "New code sent" });
   } catch (error) {

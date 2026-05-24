@@ -2,7 +2,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-
 import { db } from "@/lib/db";
 import { sendOTPEmail } from "@/lib/email";
 
@@ -21,13 +20,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const otpType = type ?? "LOGIN";
-
-    // Find user
-    const user = await db.user.findUnique({
-      where: { email },
-    });
-
+    const user = await db.user.findUnique({ where: { email } });
     if (!user || !user.password) {
       return NextResponse.json(
         { error: "Invalid email or password" },
@@ -35,12 +28,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify password
-    const isValid = await bcrypt.compare(
-      password,
-      user.password
-    );
-
+    const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return NextResponse.json(
         { error: "Invalid email or password" },
@@ -48,48 +36,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Delete old unused OTPs
+    // Delete existing unused codes — same as web app
     await db.verificationCode.deleteMany({
-      where: {
-        email,
-        type: otpType,
-        used: false,
-      },
+      where: { email, type: type ?? "LOGIN", used: false },
     });
 
-    // Generate OTP
     const code = generateOTP();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Expiry: 10 mins
-    const expiresAt = new Date(
-      Date.now() + 10 * 60 * 1000
-    );
-
-    // Save OTP
     await db.verificationCode.create({
-      data: {
-        email,
-        code,
-        type: otpType,
-        expiresAt,
-        attempts: 0,
-        used: false,
-      },
+      data: { email, code, type: type ?? "LOGIN", expiresAt },
     });
 
-    // SEND EMAIL
-    await sendOTPEmail(email, code, otpType);
+    // Use exact same email function as web app
+    await sendOTPEmail(email, code, type ?? "LOGIN");
 
-    return NextResponse.json({
-      success: true,
-      message: "OTP sent successfully",
-    });
+    return NextResponse.json({ message: "OTP sent to your email" });
   } catch (error) {
     console.error("[MOBILE_SEND_OTP]", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

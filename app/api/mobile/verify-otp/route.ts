@@ -1,5 +1,4 @@
 // Place at: app/api/mobile/verify-otp/route.ts
-// Verifies OTP and returns JWT token — user stays logged in until explicit logout
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
@@ -11,47 +10,71 @@ export async function POST(req: NextRequest) {
     const { email, code, type } = await req.json();
 
     if (!email || !code) {
-      return NextResponse.json({ error: "Email and code are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email and code are required" },
+        { status: 400 }
+      );
     }
 
-    const verification = await db.verificationCode.findFirst({
+    // Mirror exact logic from web app verifyOTP action
+    const record = await db.verificationCode.findFirst({
       where: { email, type: type ?? "LOGIN", used: false },
-      orderBy: { expiresAt: "desc" },
+      orderBy: { createdAt: "desc" },
     });
 
-    if (!verification) {
-      return NextResponse.json({ error: "No verification code found. Please request a new one." }, { status: 400 });
+    if (!record) {
+      return NextResponse.json(
+        { error: "Invalid or expired code." },
+        { status: 400 }
+      );
     }
 
-    if (verification.expiresAt < new Date()) {
-      return NextResponse.json({ error: "Code has expired. Please request a new one." }, { status: 400 });
+    // Check expiry
+    if (new Date() > record.expiresAt) {
+      await db.verificationCode.delete({ where: { id: record.id } });
+      return NextResponse.json(
+        { error: "Code has expired. Please request a new one." },
+        { status: 400 }
+      );
     }
 
-    if (verification.attempts >= 5) {
-      return NextResponse.json({ error: "Too many attempts. Please request a new code." }, { status: 400 });
+    // Check attempts — max 3 same as web app
+    if (record.attempts >= 3) {
+      await db.verificationCode.delete({ where: { id: record.id } });
+      return NextResponse.json(
+        { error: "Too many attempts. Please request a new code." },
+        { status: 400 }
+      );
     }
 
-    if (verification.code !== code) {
+    // Wrong code
+    if (record.code !== code) {
       await db.verificationCode.update({
-        where: { id: verification.id },
-        data: { attempts: { increment: 1 } },
+        where: { id: record.id },
+        data: { attempts: record.attempts + 1 },
       });
-      return NextResponse.json({ error: "Invalid code" }, { status: 400 });
+      const remaining = 2 - record.attempts;
+      return NextResponse.json(
+        {
+          error: `Incorrect code. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining.`,
+        },
+        { status: 400 }
+      );
     }
 
-    // Mark OTP as used
+    // Mark as used
     await db.verificationCode.update({
-      where: { id: verification.id },
+      where: { id: record.id },
       data: { used: true },
     });
 
-    // Get or activate user
+    // Get user
     const user = await db.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Build JWT — no expiry set so user stays logged in until they log out
+    // Sign JWT — 365 days so user stays logged in until explicit logout
     const payload: AuthTokenPayload = {
       userId: user.id,
       email: user.email,
@@ -61,7 +84,6 @@ export async function POST(req: NextRequest) {
       currency: user.currency ?? "USD",
     };
 
-    // 365 day token — effectively "stay logged in"
     const token = await signMobileToken(payload);
 
     return NextResponse.json({

@@ -1,10 +1,13 @@
-// app/api/mobile/signup/route.ts
+// Place at: app/api/mobile/signup/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { signMobileToken } from "@/lib/mobile-auth";
-import { AuthTokenPayload } from "@/types";
+import { sendOTPEmail } from "@/lib/email";
+
+function generateOTP(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,14 +29,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
-
-    // Generate a unique username from name
     const baseUsername = name.toLowerCase().replace(/\s+/g, "") + Math.floor(Math.random() * 9999);
 
-    // Create user (isSetupDone: false — setup flow handles the rest)
-    const user = await db.user.create({
+    // Create user
+    await db.user.create({
       data: {
         name,
         email,
@@ -46,19 +46,26 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Create and send OTP verification code
-    // Reuse your existing OTP sending logic here
-    // e.g. await sendOtpEmail(email, "SIGNUP");
+    // Send OTP verification email — same function as web app
+    await db.verificationCode.deleteMany({
+      where: { email, type: "SIGNUP", used: false },
+    });
+
+    const code = generateOTP();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await db.verificationCode.create({
+      data: { email, code, type: "SIGNUP", expiresAt },
+    });
+
+    await sendOTPEmail(email, code, "SIGNUP");
 
     return NextResponse.json({
       message: "Account created. Check your email for the verification code.",
-      email: user.email,
+      email,
     });
   } catch (error) {
     console.error("[MOBILE_SIGNUP]", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
