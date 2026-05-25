@@ -1,4 +1,4 @@
-// Place at: app/api/mobile/google-auth-url/route.ts
+// app/api/mobile/google-auth-url/route.ts
 // Returns Google OAuth URL for mobile to open in browser
 
 import { NextRequest, NextResponse } from "next/server";
