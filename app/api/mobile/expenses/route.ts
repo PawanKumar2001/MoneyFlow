@@ -1,14 +1,18 @@
-// app/api/mobile/expenses/route.ts
+// Place at: app/api/mobile/expenses/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyMobileToken } from "@/lib/mobile-auth";
 import { redis } from "@/lib/redis";
 
-const CACHE_TTL = 300; // 5 minutes — matches web app
+const CACHE_TTL = 300; // 5 minutes
 
-function cacheKey(userId: string, month: number, year: number) {
+function expenseCacheKey(userId: string, month: number, year: number) {
   return `expenses:${userId}:${month}:${year}`;
+}
+
+function summaryCacheKey(userId: string, month: number, year: number) {
+  return `summary:${userId}:${month}:${year}`;
 }
 
 // GET /api/mobile/expenses?month=5&year=2026
@@ -28,8 +32,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "month and year are required" }, { status: 400 });
     }
 
-    // Try cache first
-    const key = cacheKey(payload.userId, month, year);
+    const key = expenseCacheKey(payload.userId, month, year);
     const cached = await redis.get(key);
     if (cached) return NextResponse.json({ expenses: cached });
 
@@ -39,7 +42,6 @@ export async function GET(req: NextRequest) {
     });
 
     await redis.set(key, expenses, { ex: CACHE_TTL });
-
     return NextResponse.json({ expenses });
   } catch (error) {
     console.error("[MOBILE_EXPENSES_GET]", error);
@@ -80,8 +82,9 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Invalidate cache
-    await redis.del(cacheKey(payload.userId, month, year));
+    // Invalidate both expenses AND summary cache
+    await redis.del(expenseCacheKey(payload.userId, month, year));
+    await redis.del(summaryCacheKey(payload.userId, month, year));
 
     return NextResponse.json({ expense }, { status: 201 });
   } catch (error) {

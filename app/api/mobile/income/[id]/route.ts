@@ -1,9 +1,17 @@
-// app/api/mobile/income/[id]/route.ts
+// Place at: app/api/mobile/income/[id]/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyMobileToken } from "@/lib/mobile-auth";
 import { redis } from "@/lib/redis";
+
+async function clearCaches(userId: string, month: number, year: number) {
+  await Promise.all([
+    redis.del(`income:${userId}:${month}:${year}`),
+    redis.del(`income:${userId}:salaried`),
+    redis.del(`summary:${userId}:${month}:${year}`),
+  ]);
+}
 
 // PATCH /api/mobile/income/[id]
 export async function PATCH(
@@ -36,9 +44,9 @@ export async function PATCH(
       },
     });
 
-    await redis.del(`income:${payload.userId}:${income.month}:${income.year}`);
-    await redis.del(`income:${payload.userId}:${updated.month}:${updated.year}`);
-    await redis.del(`income:${payload.userId}:salaried`);
+    // Clear caches for both old and new month
+    await clearCaches(payload.userId, income.month, income.year);
+    await clearCaches(payload.userId, updated.month, updated.year);
 
     return NextResponse.json({ income: updated });
   } catch (error) {
@@ -67,8 +75,8 @@ export async function DELETE(
 
     await db.income.delete({ where: { id } });
 
-    await redis.del(`income:${payload.userId}:${income.month}:${income.year}`);
-    await redis.del(`income:${payload.userId}:salaried`);
+    // Clear income and summary cache
+    await clearCaches(payload.userId, income.month, income.year);
 
     return NextResponse.json({ success: true });
   } catch (error) {
