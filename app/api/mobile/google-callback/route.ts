@@ -36,8 +36,8 @@ export async function GET(req: NextRequest) {
     }
 
     const nextAuthUrl = process.env.NEXTAUTH_URL;
-    const googleClientId = process.env.GOOGLE_CLIENT_ID;
-    const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const googleClientId = process.env.AUTH_GOOGLE_ID;
+    const googleClientSecret = process.env.AUTH_GOOGLE_SECRET;
 
     if (!nextAuthUrl || !googleClientId || !googleClientSecret) {
       console.error("[MOBILE_GOOGLE_CALLBACK] Missing OAuth env vars");
