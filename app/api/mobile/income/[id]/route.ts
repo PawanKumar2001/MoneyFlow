@@ -44,9 +44,14 @@ export async function PATCH(
       },
     });
 
-    // Clear caches for both old and new month
-    await clearCaches(payload.userId, income.month, income.year);
-    await clearCaches(payload.userId, updated.month, updated.year);
+    // Clear caches for both old and new month only when month/year exist
+    if (income.month !== null && income.year !== null) {
+      await clearCaches(payload.userId, income.month, income.year);
+    }
+
+    if (updated.month !== null && updated.year !== null) {
+      await clearCaches(payload.userId, updated.month, updated.year);
+    }
 
     return NextResponse.json({ income: updated });
   } catch (error) {
