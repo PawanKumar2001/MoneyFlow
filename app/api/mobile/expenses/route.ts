@@ -1,4 +1,4 @@
-// Place at: app/api/mobile/expenses/route.ts
+// app/api/mobile/expenses/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
@@ -15,37 +15,74 @@ function summaryCacheKey(userId: string, month: number, year: number) {
   return `summary:${userId}:${month}:${year}`;
 }
 
+function parseRequiredNumber(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseRequiredDate(value: unknown) {
+  if (!value) return null;
+
+  const parsed = new Date(String(value));
+
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 // GET /api/mobile/expenses?month=5&year=2026
 export async function GET(req: NextRequest) {
   try {
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const payload = await verifyMobileToken(token);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+
+    if (!payload) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
 
     const { searchParams } = new URL(req.url);
-    const month = parseInt(searchParams.get("month") ?? "0");
-    const year = parseInt(searchParams.get("year") ?? "0");
 
-    if (!month || !year) {
-      return NextResponse.json({ error: "month and year are required" }, { status: 400 });
+    const month = parseRequiredNumber(searchParams.get("month"));
+    const year = parseRequiredNumber(searchParams.get("year"));
+
+    if (month === null || year === null) {
+      return NextResponse.json(
+        { error: "month and year are required" },
+        { status: 400 }
+      );
     }
 
     const key = expenseCacheKey(payload.userId, month, year);
     const cached = await redis.get(key);
-    if (cached) return NextResponse.json({ expenses: cached });
+
+    if (cached) {
+      return NextResponse.json({ expenses: cached });
+    }
 
     const expenses = await db.expense.findMany({
-      where: { userId: payload.userId, month, year },
-      orderBy: { date: "desc" },
+      where: {
+        userId: payload.userId,
+        month,
+        year,
+      },
+      orderBy: {
+        date: "desc",
+      },
     });
 
     await redis.set(key, expenses, { ex: CACHE_TTL });
+
     return NextResponse.json({ expenses });
   } catch (error) {
     console.error("[MOBILE_EXPENSES_GET]", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -53,18 +90,29 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const payload = await verifyMobileToken(token);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+
+    if (!payload) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
 
     const { name, category, amount, date } = await req.json();
 
-    if (!name || !category || !amount || !date) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    const parsedAmount = parseRequiredNumber(amount);
+    const parsedDate = parseRequiredDate(date);
+
+    if (!name || !category || parsedAmount === null || parsedDate === null) {
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      );
     }
 
-    const parsedDate = new Date(date);
     const month = parsedDate.getMonth() + 1;
     const year = parsedDate.getFullYear();
 
@@ -73,7 +121,7 @@ export async function POST(req: NextRequest) {
         userId: payload.userId,
         name,
         category,
-        amount: parseFloat(amount),
+        amount: parsedAmount,
         date: parsedDate,
         month,
         year,
@@ -82,13 +130,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Invalidate both expenses AND summary cache
-    await redis.del(expenseCacheKey(payload.userId, month, year));
-    await redis.del(summaryCacheKey(payload.userId, month, year));
+    // Invalidate both expenses and summary cache
+    await Promise.all([
+      redis.del(expenseCacheKey(payload.userId, month, year)),
+      redis.del(summaryCacheKey(payload.userId, month, year)),
+    ]);
 
     return NextResponse.json({ expense }, { status: 201 });
   } catch (error) {
     console.error("[MOBILE_EXPENSES_POST]", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

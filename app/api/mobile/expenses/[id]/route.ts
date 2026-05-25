@@ -1,4 +1,4 @@
-// Place at: app/api/mobile/expenses/[id]/route.ts
+// app/api/mobile/expenses/[id]/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
@@ -20,6 +20,26 @@ async function clearCaches(userId: string, month: number, year: number) {
   ]);
 }
 
+function parseOptionalRequiredNumber(value: unknown, fallback: number) {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function parseOptionalDate(value: unknown, fallback: Date) {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  const parsed = new Date(String(value));
+
+  return Number.isNaN(parsed.getTime()) ? fallback : parsed;
+}
+
 // PATCH /api/mobile/expenses/[id]
 export async function PATCH(
   req: NextRequest,
@@ -27,13 +47,23 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
+
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const payload = await verifyMobileToken(token);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    const expense = await db.expense.findUnique({ where: { id } });
+    if (!payload) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
+    const expense = await db.expense.findUnique({
+      where: { id },
+    });
+
     if (!expense || expense.userId !== payload.userId) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -46,7 +76,10 @@ export async function PATCH(
     }
 
     const { name, category, amount, date } = await req.json();
-    const parsedDate = date ? new Date(date) : expense.date;
+
+    const parsedDate = parseOptionalDate(date, expense.date);
+    const parsedAmount = parseOptionalRequiredNumber(amount, expense.amount);
+
     const month = parsedDate.getMonth() + 1;
     const year = parsedDate.getFullYear();
 
@@ -55,7 +88,7 @@ export async function PATCH(
       data: {
         name: name ?? expense.name,
         category: category ?? expense.category,
-        amount: amount ? parseFloat(amount) : expense.amount,
+        amount: parsedAmount,
         date: parsedDate,
         month,
         year,
@@ -63,13 +96,19 @@ export async function PATCH(
     });
 
     // Clear caches for both old and new month
-    await clearCaches(payload.userId, expense.month, expense.year);
-    await clearCaches(payload.userId, month, year);
+    await Promise.all([
+      clearCaches(payload.userId, expense.month, expense.year),
+      clearCaches(payload.userId, month, year),
+    ]);
 
     return NextResponse.json({ expense: updated });
   } catch (error) {
     console.error("[MOBILE_EXPENSES_PATCH]", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -80,18 +119,30 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+
     const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const payload = await verifyMobileToken(token);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-    const expense = await db.expense.findUnique({ where: { id } });
+    if (!payload) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
+    const expense = await db.expense.findUnique({
+      where: { id },
+    });
+
     if (!expense || expense.userId !== payload.userId) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    await db.expense.delete({ where: { id } });
+    await db.expense.delete({
+      where: { id },
+    });
 
     // Clear both expenses and summary cache
     await clearCaches(payload.userId, expense.month, expense.year);
@@ -99,6 +150,10 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[MOBILE_EXPENSES_DELETE]", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
