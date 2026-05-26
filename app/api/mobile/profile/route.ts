@@ -67,6 +67,7 @@ export async function PATCH(req: NextRequest) {
         incomeType: updated.incomeType,
         isSetupDone: updated.isSetupDone,
         emailSummary: updated.emailSummary,
+        hasPassword: !!updated.password,
       },
     });
   } catch (error) {

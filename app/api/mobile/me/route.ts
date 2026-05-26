@@ -10,8 +10,28 @@ export async function GET(req: NextRequest) {
   const payload: AuthTokenPayload | null = await verifyMobileToken(token);
   if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-  const user = await db.user.findUnique({ where: { id: payload.userId } });
-  if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const user = await db.user.findUnique({
+    where: { id: payload.userId },
+  });
 
-  return NextResponse.json({ user });
+  if (!user) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const safeUser = {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    username: user.username,
+    image: user.image,
+    currency: user.currency,
+    incomeType: user.incomeType,
+    isSetupDone: user.isSetupDone,
+    emailSummary: user.emailSummary,
+    hasPassword: !!user.password,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+
+  return NextResponse.json({ user: safeUser });
 }

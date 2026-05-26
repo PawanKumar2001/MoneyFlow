@@ -114,6 +114,14 @@ export async function GET(req: NextRequest) {
           emailSummary: false,
         },
       });
+    } else {
+      user = await db.user.update({
+        where: { id: user.id },
+        data: {
+          name: googleUser.name ?? user.name,
+          image: googleUser.picture ?? user.image,
+        },
+      });
     }
 
     const payload: AuthTokenPayload = {
