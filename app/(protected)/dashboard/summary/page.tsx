@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMonthStore } from "@/store/monthStore";
 import { getMonthlySummary, getMonthlyTrend } from "@/actions/summary";
 import { generateInsights } from "@/lib/insights";
@@ -20,7 +20,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
   LineChart,
   Line,
 } from "recharts";
@@ -51,57 +50,131 @@ type TrendData = {
 }[];
 
 const PIE_COLORS = [
-  "#6366f1", "#10b981", "#f59e0b", "#ef4444",
-  "#8b5cf6", "#06b6d4", "#f97316", "#84cc16",
+  "#6366f1",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+  "#06b6d4",
+  "#f97316",
+  "#84cc16",
 ];
 
 const TABS = ["Chart View", "Table View"];
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 export default function SummaryPage() {
   const { month, year } = useMonthStore();
   const [data, setData] = useState<SummaryData | null>(null);
   const [trend, setTrend] = useState<TrendData>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [retryKey, setRetryKey] = useState(0);
 
-  const cacheRef = useRef<{ key: string; data: SummaryData; trend: TrendData } | null>(null);
+  const cacheRef = useRef<{
+    key: string;
+    data: SummaryData;
+    trend: TrendData;
+  } | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
     const cacheKey = `${month}-${year}`;
 
-    // Use cache if same month/year
-    if (cacheRef.current?.key === cacheKey) {
+    if (cacheRef.current?.key === cacheKey && retryKey === 0) {
       setData(cacheRef.current.data);
       setTrend(cacheRef.current.trend);
       setLoading(false);
+      setError(null);
       return;
     }
 
     const fetchData = async () => {
-      setLoading(true);
-      const [result, trendResult] = await Promise.all([
-        getMonthlySummary(month, year),
-        getMonthlyTrend(month, year),
-      ]);
-      const summaryData = result as SummaryData;
-      const trendData = trendResult as TrendData;
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Store in cache
-      cacheRef.current = { key: cacheKey, data: summaryData, trend: trendData };
+        const [summaryResult, trendResult] = await Promise.allSettled([
+          getMonthlySummary(month, year),
+          getMonthlyTrend(month, year),
+        ]);
 
-      setData(summaryData);
-      setTrend(trendData);
-      setLoading(false);
+        if (!isMounted) return;
+
+        if (summaryResult.status === "rejected" || !summaryResult.value) {
+          throw new Error("Monthly summary request failed.");
+        }
+
+        const summaryData = summaryResult.value as SummaryData;
+        const safeSummaryData: SummaryData = {
+          ...summaryData,
+          expenses: summaryData.expenses ?? [],
+          byCategory: summaryData.byCategory ?? [],
+        };
+
+        const trendData =
+          trendResult.status === "fulfilled" && Array.isArray(trendResult.value)
+            ? (trendResult.value as TrendData)
+            : [];
+
+        cacheRef.current = {
+          key: cacheKey,
+          data: safeSummaryData,
+          trend: trendData,
+        };
+
+        setData(safeSummaryData);
+        setTrend(trendData);
+      } catch (err) {
+        console.error("Failed to load summary page:", err);
+
+        if (!isMounted) return;
+
+        setError("Could not load summary. Please try again.");
+        setData(null);
+        setTrend([]);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
 
     fetchData();
-  }, [month, year]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [month, year, retryKey]);
 
   const symbol = data ? getCurrencySymbol(data.currency) : "₹";
   const isFreelancer = data?.incomeType === "FREELANCER";
-  const insights = data ? generateInsights(data) : [];
   const hasExpenses = (data?.expenses.length ?? 0) > 0;
   const hasIncome = (data?.totalIncome ?? 0) > 0;
+
+  const insights = data
+    ? generateInsights(data).map((insight) => ({
+        ...insight,
+        description: insight.description.replace(
+          /a total\s+of this month/i,
+          `a total of ${symbol}${formatAmount(data.totalIncome)} this month`
+        ),
+      }))
+    : [];
 
   const barData = [
     {
@@ -117,47 +190,35 @@ export default function SummaryPage() {
     },
   ];
 
-  // CSV Download Handler
   const handleExport = () => {
-  if (!data || data.expenses.length === 0) return;
-  const csv = generateExpenseCSV(
-    data.expenses,
-    data.currency,
-    month,
-    year
-  );
-  const MONTHS = [
-    "January", "February", "March", "April",
-    "May", "June", "July", "August",
-    "September", "October", "November", "December",
-  ];
-  downloadCSV(csv, `MoneyFlow_${MONTHS[month - 1]}_${year}.csv`);
-};
+    if (!data || data.expenses.length === 0) return;
 
-  // Loading State
+    const csv = generateExpenseCSV(data.expenses, data.currency, month, year);
+    downloadCSV(csv, `MoneyFlow_${MONTHS[month - 1]}_${year}.csv`);
+  };
+
   if (loading) {
     return (
       <div className="px-6 md:px-12 lg:px-20 pt-6 space-y-6 pb-8">
-        {/* Header skeleton */}
         <div className="space-y-2">
           <div className="h-6 w-48 rounded-lg bg-white/5 animate-pulse" />
           <div className="h-4 w-64 rounded-lg bg-white/5 animate-pulse" />
         </div>
 
-        {/* Stats skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2 animate-pulse">
+            <div
+              key={i}
+              className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2 animate-pulse"
+            >
               <div className="h-3 w-16 rounded bg-white/10" />
               <div className="h-6 w-24 rounded bg-white/10" />
             </div>
           ))}
         </div>
 
-        {/* Tab skeleton */}
         <div className="h-9 w-48 rounded-xl bg-white/5 animate-pulse" />
 
-        {/* Chart skeletons */}
         <div className="space-y-6">
           <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-4">
             <div className="h-4 w-36 rounded bg-white/10 animate-pulse" />
@@ -172,7 +233,28 @@ export default function SummaryPage() {
     );
   }
 
-  // Full Empty State — no expenses AND no income
+  if (error) {
+    return (
+      <div className="px-6 md:px-12 lg:px-20 pt-6">
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+            Could not load summary
+          </h3>
+          <p className="text-sm text-slate-400 max-w-sm mb-5">
+            Something went wrong while loading your monthly summary.
+          </p>
+          <button
+            onClick={() => setRetryKey((key) => key + 1)}
+            className="rounded-lg bg-white text-black px-4 py-2 text-sm font-medium hover:bg-slate-200 transition"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!hasExpenses && !hasIncome) {
     return (
       <div className="px-6 md:px-12 lg:px-20 pt-6">
@@ -189,8 +271,8 @@ export default function SummaryPage() {
           </h3>
           <p className="text-sm text-slate-400 max-w-sm mb-2">
             Add some expenses or{" "}
-            {isFreelancer ? "log your income" : "check your income setup"}{" "}
-            to see your monthly summary here.
+            {isFreelancer ? "log your income" : "check your income setup"} to
+            see your monthly summary here.
           </p>
           <p className="text-xs text-slate-500">
             Navigate to the Expenses tab to get started.
@@ -202,27 +284,26 @@ export default function SummaryPage() {
 
   return (
     <div className="px-6 md:px-12 lg:px-20 pt-6 space-y-6 pb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold text-white">Monthly Summary</h2>
           <p className="text-xs text-slate-400 flex items-center gap-2">
             Overview of your finances for this month
           </p>
         </div>
+
         {hasExpenses && (
           <Button
             onClick={handleExport}
             variant="outline"
-            className="border-white/10 text-slate-300 hover:bg-white/5 gap-2 text-sm"
+            className="border-white/10 text-slate-300 hover:bg-white/5 gap-2 text-sm shrink-0"
           >
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">Export CSV</span>
           </Button>
         )}
       </div>
-      
-      {/* Stats Row */}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           {
@@ -259,7 +340,6 @@ export default function SummaryPage() {
         ))}
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 p-1 rounded-xl bg-white/5 border border-white/10 w-fit">
         {TABS.map((tab, i) => (
           <button
@@ -276,37 +356,28 @@ export default function SummaryPage() {
         ))}
       </div>
 
-      {/* Chart View */}
       {activeTab === 0 && (
         <div className="space-y-6">
-          {/* Income vs Expense Bar Chart */}
           <div className="rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
             <h3 className="text-sm font-semibold text-white mb-4">
               {isFreelancer ? "Earnings vs Expenses" : "Income vs Expenses"}
             </h3>
-            {!hasIncome && !hasExpenses ? (
-              <div className="flex items-center justify-center h-[220px]">
-                <p className="text-slate-500 text-sm">No data to display</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={barData} barSize={48}>
-                <defs/>
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fill: "#94a3b8", fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fill: "#94a3b8", fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v) =>
-                      `${symbol}${(v / 1000).toFixed(0)}k`
-                    }
-                  />
-                  <Tooltip
+
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={barData} barSize={48}>
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: "#94a3b8", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: "#94a3b8", fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => `${symbol}${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip
                   contentStyle={{
                     backgroundColor: "rgba(0,0,0,0.9)",
                     border: "1px solid rgba(255,255,255,0.2)",
@@ -325,17 +396,15 @@ export default function SummaryPage() {
                     "",
                   ]}
                 />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]} cursor="default">
-                    {barData.map((entry, i) => (
-                      <Cell key={i} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} cursor="default">
+                  {barData.map((entry, i) => (
+                    <Cell key={i} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
-          {/* 6 Month Trend */}
           {trend.length > 0 && (
             <div className="rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
               <h3 className="text-sm font-semibold text-white mb-4">
@@ -360,24 +429,24 @@ export default function SummaryPage() {
                     }
                   />
                   <Tooltip
-                  contentStyle={{
-                    backgroundColor: "rgba(0,0,0,0.9)",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    borderRadius: "12px",
-                    color: "#fff",
-                  }}
-                  itemStyle={{ color: "#fff" }}
-                  labelStyle={{ color: "#fff" }}
-                  cursor={{
-                    fill: "transparent",
-                    stroke: "rgba(255,255,255,0.2)",
-                    strokeWidth: 1,
-                  }}
-                  formatter={(value) => [
-                    `${symbol}${Number(value).toLocaleString()}`,
-                    "",
-                  ]}
-                />
+                    contentStyle={{
+                      backgroundColor: "rgba(0,0,0,0.9)",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: "12px",
+                      color: "#fff",
+                    }}
+                    itemStyle={{ color: "#fff" }}
+                    labelStyle={{ color: "#fff" }}
+                    cursor={{
+                      fill: "transparent",
+                      stroke: "rgba(255,255,255,0.2)",
+                      strokeWidth: 1,
+                    }}
+                    formatter={(value) => [
+                      `${symbol}${Number(value).toLocaleString()}`,
+                      "",
+                    ]}
+                  />
                   {isFreelancer && (
                     <Line
                       type="monotone"
@@ -401,58 +470,68 @@ export default function SummaryPage() {
             </div>
           )}
 
-          {/* Pie Chart */}
           {data!.byCategory.length > 0 ? (
             <div className="rounded-xl border border-white/10 bg-white/5 p-4 overflow-hidden">
               <h3 className="text-sm font-semibold text-white mb-4">
                 Spending by Category
               </h3>
-              <ResponsiveContainer width="100%" height={260}>
-                <PieChart>
-                  <Pie
-                    data={data!.byCategory}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {data!.byCategory.map((_, i) => (
-                      <Cell
-                        key={i}
-                        fill={PIE_COLORS[i % PIE_COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                  contentStyle={{
-                    backgroundColor: "rgba(0,0,0,0.9)",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    borderRadius: "12px",
-                    color: "#fff",
-                  }}
-                  itemStyle={{ color: "#fff" }}
-                  labelStyle={{ color: "#fff" }}
-                  cursor={{
-                    fill: "transparent",
-                    stroke: "rgba(255,255,255,0.2)",
-                    strokeWidth: 1,
-                  }}
-                  formatter={(value) => [
-                    `${symbol}${Number(value).toLocaleString()}`,
-                    "",
-                  ]}
-                />
-                  <Legend
-                    formatter={(value) => (
-                      <span style={{ color: "#94a3b8", fontSize: "12px" }}>
-                        {value}
-                      </span>
-                    )}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+
+              <div className="h-[220px] sm:h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={data!.byCategory}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="45%"
+                      outerRadius="75%"
+                      paddingAngle={3}
+                      dataKey="value"
+                      isAnimationActive={false}
+                    >
+                      {data!.byCategory.map((_, i) => (
+                        <Cell
+                          key={i}
+                          fill={PIE_COLORS[i % PIE_COLORS.length]}
+                          stroke="transparent"
+                          style={{ outline: "none" }}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      cursor={false}
+                      contentStyle={{
+                        backgroundColor: "rgba(0,0,0,0.9)",
+                        border: "1px solid rgba(255,255,255,0.2)",
+                        borderRadius: "12px",
+                        color: "#fff",
+                      }}
+                      itemStyle={{ color: "#fff" }}
+                      labelStyle={{ color: "#fff" }}
+                      formatter={(value) => [
+                        `${symbol}${Number(value).toLocaleString()}`,
+                        "",
+                      ]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2">
+                {data!.byCategory.map((item, i) => (
+                  <div key={item.name} className="flex items-center gap-1.5">
+                    <span
+                      className="h-3 w-3 shrink-0 rounded-sm"
+                      style={{
+                        backgroundColor: PIE_COLORS[i % PIE_COLORS.length],
+                      }}
+                    />
+                    <span className="text-xs text-slate-400 leading-none">
+                      {item.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -468,7 +547,6 @@ export default function SummaryPage() {
             </div>
           )}
 
-          {/* Insights */}
           {insights.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-white">
@@ -498,7 +576,6 @@ export default function SummaryPage() {
         </div>
       )}
 
-      {/* Table View */}
       {activeTab === 1 && (
         <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
           {!hasExpenses ? (
@@ -510,10 +587,10 @@ export default function SummaryPage() {
             </div>
           ) : (
             <>
-              {/* Toolbar */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
                 <p className="text-xs text-slate-400">
-                  {data!.expenses.length} expense{data!.expenses.length !== 1 ? "s" : ""}
+                  {data!.expenses.length} expense
+                  {data!.expenses.length !== 1 ? "s" : ""}
                 </p>
                 <button
                   onClick={handleExport}
@@ -524,16 +601,25 @@ export default function SummaryPage() {
                 </button>
               </div>
 
-              {/* Table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/10 text-left">
-                      <th className="px-4 py-3 text-xs font-medium text-slate-400">Name</th>
-                      <th className="px-4 py-3 text-xs font-medium text-slate-400">Category</th>
-                      <th className="px-4 py-3 text-xs font-medium text-slate-400">Amount</th>
-                      <th className="px-4 py-3 text-xs font-medium text-slate-400">Date</th>
-                      <th className="px-4 py-3 text-xs font-medium text-slate-400">Type</th>
+                      <th className="px-4 py-3 text-xs font-medium text-slate-400">
+                        Name
+                      </th>
+                      <th className="px-4 py-3 text-xs font-medium text-slate-400">
+                        Category
+                      </th>
+                      <th className="px-4 py-3 text-xs font-medium text-slate-400">
+                        Amount
+                      </th>
+                      <th className="px-4 py-3 text-xs font-medium text-slate-400">
+                        Date
+                      </th>
+                      <th className="px-4 py-3 text-xs font-medium text-slate-400">
+                        Type
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -549,7 +635,8 @@ export default function SummaryPage() {
                           {expense.category}
                         </td>
                         <td className="px-4 py-3 font-semibold text-emerald-400">
-                          {symbol}{formatAmount(expense.amount)}
+                          {symbol}
+                          {formatAmount(expense.amount)}
                         </td>
                         <td className="px-4 py-3 text-slate-400">
                           {new Date(expense.date).toLocaleDateString("en-US", {
@@ -573,14 +660,19 @@ export default function SummaryPage() {
                   </tbody>
                   <tfoot>
                     <tr className="border-t border-white/10 bg-white/5">
-                      <td colSpan={2} className="px-4 py-3 text-slate-400 font-medium text-xs">
+                      <td
+                        colSpan={2}
+                        className="px-4 py-3 text-slate-400 font-medium text-xs"
+                      >
                         Total Expenses
                       </td>
                       <td className="px-4 py-3 font-bold text-red-400">
-                        {symbol}{formatAmount(data!.totalExpenses)}
+                        {symbol}
+                        {formatAmount(data!.totalExpenses)}
                       </td>
                       <td colSpan={2} className="px-4 py-3 text-xs text-slate-500">
-                        Remaining: {symbol}{formatAmount(Math.max(data!.remaining, 0))}
+                        Remaining: {symbol}
+                        {formatAmount(Math.max(data!.remaining, 0))}
                       </td>
                     </tr>
                   </tfoot>
