@@ -1,4 +1,5 @@
-export const metadata = { title: "Dashboard" };
+export const metadata = { title: "Dashboard | MoneyFlow" };
+
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -11,14 +12,13 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+
   if (!session) redirect("/login");
   if (!session.user.isSetupDone) redirect("/setup");
 
   const user = await db.user.findUnique({
     where: { id: session.user.id },
   });
-
-  console.log("incomeType:", user?.incomeType);
 
   return (
     <div className="min-h-[calc(100vh-69px)] bg-transparent">
@@ -29,7 +29,7 @@ export default async function DashboardLayout({
         incomeType={user?.incomeType ?? "SALARIED"}
       />
 
-      <main className="relative z-10 mx-auto max-w-7xl">
+      <main className="relative z-10 mx-auto w-full max-w-7xl">
         {children}
       </main>
 
@@ -43,8 +43,8 @@ export default async function DashboardLayout({
           },
           classNames: {
             success: "!border-white/20",
-            error: "!border-red-500/30",
-            warning: "!border-yellow-500/30",
+            error: "!border-white/20",
+            warning: "!border-white/20",
           },
         }}
       />

@@ -1,25 +1,32 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMonthStore } from "@/store/monthStore";
 import { getExpenses, deleteExpense } from "@/actions/expenses";
 import { getUserIncome, getMonthlyFreelanceIncome } from "@/actions/income";
-import { Search, PlusCircle } from "lucide-react";
+import { PlusCircle, ReceiptText, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ExpenseCard from "@/components/expenses/ExpenseCard";
 import ExpenseFormDialog from "@/components/expenses/ExpenseFormDialog";
 import ConfirmModal from "@/components/shared/ConfirmModal";
-import EmptyState from "@/components/shared/EmptyState";
 import IncomeSummaryBar from "@/components/shared/IncomeSummaryBar";
 import EditIncomeModal from "@/components/shared/EditIncomeModal";
-import LogIncomeModal from "@/components/shared/LogIncomeModal";
 import { toast } from "sonner";
 
 const CATEGORIES = [
-  "All", "Grocery", "Food & Dining", "Transportation",
-  "Utilities & Bills", "Healthcare", "Rent/Housing",
-  "Entertainment", "Shopping", "Education", "Travel", "Others",
+  "All",
+  "Grocery",
+  "Food & Dining",
+  "Transportation",
+  "Utilities & Bills",
+  "Healthcare",
+  "Rent/Housing",
+  "Entertainment",
+  "Shopping",
+  "Education",
+  "Travel",
+  "Others",
 ];
 
 type Expense = {
@@ -33,6 +40,7 @@ type Expense = {
 
 export default function DashboardPage() {
   const { month, year } = useMonthStore();
+
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -46,27 +54,28 @@ export default function DashboardPage() {
   const [currency, setCurrency] = useState("INR");
   const [incomeType, setIncomeType] = useState("SALARIED");
   const [showEditIncome, setShowEditIncome] = useState(false);
-  const [shouldRefetch, setShouldRefetch] = useState(false);
 
   const fetchAll = async () => {
     setLoading(true);
+
     try {
       const [data, incomeData] = await Promise.all([
         getExpenses(month, year),
         getUserIncome(),
       ]);
-      setExpenses(data as Expense[]);
-      setCurrency(incomeData.currency);
-      setIncomeType(incomeData.incomeType);
 
-      // Fetch income based on type
+      setExpenses(data as Expense[]);
+      setCurrency(incomeData.currency ?? "INR");
+      setIncomeType(incomeData.incomeType ?? "SALARIED");
+
       if (incomeData.incomeType === "FREELANCER") {
         const freelanceData = await getMonthlyFreelanceIncome(month, year);
-        setTotalIncome(freelanceData.total);
+        setTotalIncome(freelanceData.total ?? 0);
       } else {
-        setTotalIncome(incomeData.total);
+        setTotalIncome(incomeData.total ?? 0);
       }
-    } catch {
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error);
       toast.error("Failed to load data. Please refresh.");
     } finally {
       setLoading(false);
@@ -75,21 +84,27 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, year]);
 
   const filtered = useMemo(() => {
     let result = [...expenses];
-    if (search) {
-      result = result.filter((e) =>
-        e.name.toLowerCase().includes(search.toLowerCase())
+
+    if (search.trim()) {
+      result = result.filter((expense) =>
+        expense.name.toLowerCase().includes(search.toLowerCase().trim())
       );
     }
+
     if (categoryFilter !== "All") {
-      result = result.filter((e) => e.category === categoryFilter);
+      result = result.filter((expense) => expense.category === categoryFilter);
     }
+
     switch (sortBy) {
       case "oldest":
-        result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        result.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
         break;
       case "highest":
         result.sort((a, b) => b.amount - a.amount);
@@ -98,35 +113,55 @@ export default function DashboardPage() {
         result.sort((a, b) => a.amount - b.amount);
         break;
       default:
-        result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        result.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
     }
+
     return result;
   }, [expenses, search, categoryFilter, sortBy]);
 
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   const handleDelete = async () => {
     if (!deletingId) return;
+
+    const idToDelete = deletingId;
+
     setDeleteLoading(true);
-
-    // Optimistic update — remove from UI immediately
-    setExpenses((prev) => prev.filter((e) => e.id !== deletingId));
     setDeletingId(null);
+    setExpenses((prev) => prev.filter((expense) => expense.id !== idToDelete));
 
-    const result = await deleteExpense(deletingId);
-    if (result?.error) {
-      toast.error("Failed to delete. Please refresh.");
-      // Refetch only if it failed
-      fetchAll();
-    } else {
+    try {
+      const result = await deleteExpense(idToDelete);
+
+      if (result?.error) {
+        toast.error("Failed to delete. Please refresh.");
+        fetchAll();
+        return;
+      }
+
       toast.success("Expense deleted!");
+    } catch (error) {
+      console.error("Failed to delete expense:", error);
+      toast.error("Failed to delete. Please refresh.");
+      fetchAll();
+    } finally {
+      setDeleteLoading(false);
     }
-    setDeleteLoading(false);
   };
+
+  const openAddExpense = () => {
+    setEditingExpense(null);
+    setShowForm(true);
+  };
+
+  const isFiltering = search.trim() || categoryFilter !== "All";
 
   return (
     <>
       <IncomeSummaryBar
+        loading={loading}
         totalIncome={totalIncome}
         totalExpenses={totalExpenses}
         currency={currency}
@@ -134,18 +169,19 @@ export default function DashboardPage() {
         onEditIncome={() => setShowEditIncome(true)}
       />
 
-      <div className="px-6 md:px-12 lg:px-20 pt-6 space-y-4">
+      <div className="px-4 pt-6 pb-6 md:px-8 lg:px-12 xl:px-20 space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-bold text-white">Expenses</h2>
             <p className="text-xs text-slate-400">
               {expenses.length} expense{expenses.length !== 1 ? "s" : ""} this month
             </p>
           </div>
+
           <Button
-            onClick={() => { setEditingExpense(null); setShowForm(true); }}
-            className="bg-white hover:bg-white/90 text-black gap-2"
+            onClick={openAddExpense}
+            className="w-full bg-white text-black hover:bg-white/90 gap-2 sm:w-auto"
           >
             <PlusCircle className="h-4 w-4" />
             Add Expense
@@ -153,77 +189,102 @@ export default function DashboardPage() {
         </div>
 
         {/* Search + Filters */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          {/* Search */}
+        <div className="flex flex-col gap-2 lg:flex-row">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             <Input
-              placeholder="Search Expenses"
+              placeholder="Search expenses"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white-50 w-full h-10"
+              onChange={(event) => setSearch(event.target.value)}
+              className="h-10 w-full border-white/10 bg-white/5 pl-9 text-white placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-white/30"
             />
           </div>
 
-          {/* Filters */}
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex">
             <select
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full sm:w-44 px-3 py-2 h-10 rounded-lg bg-black-80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 cursor-pointer"
+              onChange={(event) => setCategoryFilter(event.target.value)}
+              className="h-10 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-48"
             >
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat} className="bg-black">{cat}</option>
+              {CATEGORIES.map((category) => (
+                <option key={category} value={category} className="bg-black">
+                  {category}
+                </option>
               ))}
             </select>
+
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full sm:w-36 px-3 py-2 h-10 rounded-lg bg-black-80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 cursor-pointer"
+              onChange={(event) => setSortBy(event.target.value)}
+              className="h-10 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-36"
             >
-              <option value="newest" className="bg-black">Newest</option>
-              <option value="oldest" className="bg-black">Oldest</option>
-              <option value="highest" className="bg-black">Highest</option>
-              <option value="lowest" className="bg-black">Lowest</option>
+              <option value="newest" className="bg-black">
+                Newest
+              </option>
+              <option value="oldest" className="bg-black">
+                Oldest
+              </option>
+              <option value="highest" className="bg-black">
+                Highest
+              </option>
+              <option value="lowest" className="bg-black">
+                Lowest
+              </option>
             </select>
           </div>
         </div>
 
         {/* Expense List */}
-        <div
-          className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden flex flex-col mb-3"
-          style={{ height: "calc(100vh - 440px)", minHeight: "300px" }}
-        >
+        <div className="flex min-h-[340px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] mb-3 md:h-[calc(100vh-440px)]">
           {loading ? (
             <div className="space-y-3 p-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-16 rounded-xl bg-white/5 animate-pulse" />
+              {[...Array(4)].map((_, index) => (
+                <div
+                  key={index}
+                  className="h-16 animate-pulse rounded-xl bg-white/5"
+                />
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
-              <EmptyState
-                icon="💸"
-                title="No expenses found"
-                description={
-                  search || categoryFilter !== "All"
-                    ? "Try adjusting your search or filters"
-                    : "No expenses added yet. Start tracking your spending!"
-                }
-                actionLabel={!search && categoryFilter === "All" ? "Add Expense" : undefined}
-                onAction={() => { setEditingExpense(null); setShowForm(true); }}
-              />
+            <div className="flex flex-1 items-center justify-center px-5 py-12 text-center">
+              <div className="flex max-w-sm flex-col items-center">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                  <ReceiptText className="h-7 w-7 text-white" strokeWidth={2.2} />
+                </div>
+
+                <h3 className="text-base font-semibold text-white">
+                  No expenses found
+                </h3>
+
+                <p className="mt-1 text-sm leading-relaxed text-slate-400">
+                  {isFiltering
+                    ? "Try adjusting your search or filters."
+                    : "No expenses added yet. Start tracking your spending!"}
+                </p>
+
+                {!isFiltering && (
+                  <Button
+                    onClick={openAddExpense}
+                    className="mt-5 bg-white text-black hover:bg-white/90"
+                  >
+                    Add Expense
+                  </Button>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="overflow-y-auto flex-1 p-4 space-y-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-              {filtered.map((expense, i) => (
+            <div className="flex-1 space-y-2 overflow-y-auto p-3 sm:p-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+              {filtered.map((expense, index) => (
                 <ExpenseCard
                   key={expense.id}
                   expense={expense}
                   currency={currency}
-                  onEdit={(exp) => { setEditingExpense(exp); setShowForm(true); }}
+                  onEdit={(expenseToEdit) => {
+                    setEditingExpense(expenseToEdit);
+                    setShowForm(true);
+                  }}
                   onDelete={(id) => setDeletingId(id)}
-                  index={i}
+                  index={index}
                 />
               ))}
             </div>
@@ -239,6 +300,7 @@ export default function DashboardPage() {
         }}
         expense={editingExpense}
       />
+
       <ConfirmModal
         open={!!deletingId}
         onClose={() => setDeletingId(null)}
@@ -246,14 +308,18 @@ export default function DashboardPage() {
         loading={deleteLoading}
         title="Delete Expense?"
         description={
-          expenses.find((e) => e.id === deletingId)?.autoGenerated
+          expenses.find((expense) => expense.id === deletingId)?.autoGenerated
             ? "This will remove this month's subscription expense only. The subscription will continue generating expenses in future months."
             : "This expense will be permanently deleted."
         }
       />
+
       <EditIncomeModal
         open={showEditIncome}
-        onClose={() => { setShowEditIncome(false); fetchAll(); }}
+        onClose={() => {
+          setShowEditIncome(false);
+          fetchAll();
+        }}
         currency={currency}
       />
     </>

@@ -1,16 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { toast } from "sonner";
+import {
+  ArrowLeft,
+  AlertTriangle,
+  MailCheck,
+  RotateCcw,
+  UserCircle,
+} from "lucide-react";
+
+import { updateProfile, resetUserSetup } from "@/actions/profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { updateProfile, resetUserSetup } from "@/actions/profile";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
-import { signOut } from "next-auth/react";
-import { db } from "@/lib/db";
 
 type FormData = {
   username: string;
@@ -23,98 +29,133 @@ export default function ProfilePage() {
   const [resetLoading, setResetLoading] = useState(false);
   const router = useRouter();
 
-  const { register, handleSubmit, setValue, formState: { errors } } =
-    useForm<FormData>({
-      defaultValues: { emailSummary: true },
-    });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: { emailSummary: true },
+  });
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-    const result = await updateProfile(data);
-    if (result?.error) {
-      toast.error(result.error);
-    } else {
-      toast.success("Profile updated!");
+
+    try {
+      const result = await updateProfile(data);
+
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Profile updated!");
+      }
+    } catch {
+      toast.error("Failed to update profile. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleReset = async () => {
     setResetLoading(true);
-    const result = await resetUserSetup();
-    if (result?.error) {
-      toast.error(result.error);
+
+    try {
+      const result = await resetUserSetup();
+
+      if (result?.error) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success("Setup reset! Signing you out...");
+      await signOut({ callbackUrl: "/setup" });
+    } catch {
+      toast.error("Failed to reset setup. Please try again.");
+    } finally {
       setResetLoading(false);
-      return;
     }
-    toast.success("Setup reset! Signing you out...");
-    await signOut({ callbackUrl: "/setup" });
   };
 
   return (
-    <div className="flex items-center justify-center px-4 py-8 min-h-[80vh]">
-      <div className="w-full max-w-lg">
+    <div className="px-6 md:px-12 lg:px-20 pt-6 pb-8">
+      <div className="mx-auto w-full max-w-xl space-y-5">
         {/* Back Button */}
         <button
+          type="button"
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 text-sm"
+          className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 transition-colors hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
         </button>
 
         {/* Profile Card */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 space-y-6">
-          <div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white mb-4">
-              <span className="text-xl">👤</span>
+        <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-6">
+          <div className="mb-6 flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+              <UserCircle className="h-5 w-5 text-white" strokeWidth={2.2} />
             </div>
-            <h2 className="text-2xl font-bold text-white">Profile Settings</h2>
-            <p className="text-sm text-slate-400 mt-1">
-              Update your account information
-            </p>
+
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                Profile Settings
+              </h2>
+              <p className="mt-0.5 text-xs leading-relaxed text-slate-400">
+                Update your account preferences and MoneyFlow settings.
+              </p>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Username */}
             <div className="space-y-1.5">
-              <Label className="text-slate-300 text-sm">Username</Label>
+              <Label className="text-xs font-medium text-slate-300">
+                Username
+              </Label>
               <Input
                 placeholder="Your username"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 h-11"
+                className="h-10 rounded-xl border-white/10 bg-black/30 text-sm text-white placeholder:text-slate-600 focus:border-white/30 focus-visible:ring-0"
                 {...register("username", { required: "Username is required" })}
               />
               {errors.username && (
-                <p className="text-xs text-red-400">{errors.username.message}</p>
+                <p className="text-xs text-red-400">
+                  {errors.username.message}
+                </p>
               )}
             </div>
 
             {/* Email Summary Toggle */}
-           <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                        <div className="flex-1">
-                          <p className="text-sm text-white font-medium">
-                            Monthly Summary Email
-                          </p>
-                          <p className="text-xs text-slate-400 mt-0.5">
-                            Get a summary email on the 1st of every month
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                          <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            {...register("emailSummary")}
-                            defaultChecked
-                          />
-                          <div className="w-11 h-6 bg-white/10 peer-checked:bg-white/90 rounded-full transition-all duration-300 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:peer-checked:bg-black after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-5" />
-                        </label>
-                      </div>
+            <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/20 p-4 sm:flex-row sm:items-center">
+              <div className="flex flex-1 items-start gap-3">
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5">
+                  <MailCheck className="h-4 w-4 text-white" strokeWidth={2.2} />
+                </div>
 
-            <div className="flex gap-3 pt-2">
+                <div>
+                  <p className="text-sm font-medium text-white">
+                    Monthly Summary Email
+                  </p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-slate-400">
+                    Get a summary email on the 1st of every month.
+                  </p>
+                </div>
+              </div>
+
+              <label className="relative inline-flex cursor-pointer items-center self-start sm:self-center">
+                <input
+                  type="checkbox"
+                  className="peer sr-only"
+                  {...register("emailSummary")}
+                  defaultChecked
+                />
+                <div className="relative h-6 w-11 rounded-full bg-white/10 transition-all duration-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-slate-400 after:transition-all after:duration-300 after:content-[''] peer-checked:bg-white peer-checked:after:translate-x-5 peer-checked:after:bg-black" />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
               <Button
                 type="button"
                 variant="outline"
-                className="flex-1 border-white/10 text-slate-300 hover:bg-white/5 h-11"
+                className="h-10 rounded-xl border-white/10 bg-transparent text-sm text-slate-300 hover:bg-white/5 hover:text-white"
                 onClick={() => router.back()}
               >
                 Cancel
@@ -122,24 +163,26 @@ export default function ProfilePage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-white hover:bg-white/90 text-black h-11"
+                className="h-10 rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
               >
                 {loading ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>
-        </div>
+        </section>
 
         {/* Danger Zone */}
-        <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/5 p-6 space-y-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
+          <div className="mb-4 flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+              <AlertTriangle className="h-5 w-5 text-white" strokeWidth={2.2} />
+            </div>
+
             <div>
-              <h3 className="text-sm font-semibold text-red-400">Reset Setup</h3>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                This will permanently delete all your income, expenses, and
-                subscriptions. You'll be signed out and redirected to the setup
-                screen to start completely fresh.
+              <h3 className="text-sm font-semibold text-white">Reset Setup</h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                Delete your income, expenses, and subscriptions. You will be
+                signed out and sent back to setup.
               </p>
             </div>
           </div>
@@ -148,26 +191,29 @@ export default function ProfilePage() {
             <Button
               type="button"
               variant="outline"
-              className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 w-full"
+              className="h-10 w-full rounded-xl border-white/10 bg-transparent text-sm text-slate-300 hover:bg-white/5 hover:text-white"
               onClick={() => setShowResetConfirm(true)}
             >
+              <RotateCcw className="mr-2 h-4 w-4" />
               Reset My Setup
             </Button>
           ) : (
             <div className="space-y-3">
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                <p className="text-sm text-red-300 font-medium text-center">
-                  ⚠️ Are you absolutely sure?
+              <div className="rounded-xl border border-white/10 bg-black/30 p-3 text-center">
+                <p className="text-sm font-medium text-white">
+                  Are you absolutely sure?
                 </p>
-                <p className="text-xs text-slate-400 text-center mt-1">
-                  This cannot be undone. ALL data will be permanently deleted.
+                <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                  This cannot be undone. All MoneyFlow data will be permanently
+                  deleted.
                 </p>
               </div>
-              <div className="flex gap-3">
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 border-white/10 text-slate-300 hover:bg-white/5"
+                  className="h-10 rounded-xl border-white/10 bg-transparent text-sm text-slate-300 hover:bg-white/5 hover:text-white"
                   onClick={() => setShowResetConfirm(false)}
                   disabled={resetLoading}
                 >
@@ -175,16 +221,16 @@ export default function ProfilePage() {
                 </Button>
                 <Button
                   type="button"
-                  className="flex-1 bg-red-600 hover:bg-red-500 text-white"
+                  className="h-10 rounded-xl bg-white text-sm font-semibold text-black hover:bg-white/90"
                   onClick={handleReset}
                   disabled={resetLoading}
                 >
-                  {resetLoading ? "Resetting..." : "Yes, Reset Everything"}
+                  {resetLoading ? "Resetting..." : "Reset Everything"}
                 </Button>
               </div>
             </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

@@ -1,14 +1,19 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMonthStore } from "@/store/monthStore";
 import {
-  getMonthlyFreelanceIncome,
   deleteFreelanceIncome,
+  getMonthlyFreelanceIncome,
   getUserIncome,
 } from "@/actions/income";
 import { getCurrencySymbol } from "@/lib/currency";
-import { Search, PlusCircle, TrendingUp } from "lucide-react";
+import {
+  PlusCircle,
+  Search,
+  TrendingUp,
+  WalletCards,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -16,7 +21,6 @@ import { motion } from "framer-motion";
 import IncomeCard from "@/components/income/IncomeCard";
 import IncomeFormDialog from "@/components/income/IncomeFormDialog";
 import ConfirmModal from "@/components/shared/ConfirmModal";
-import EmptyState from "@/components/shared/EmptyState";
 
 type IncomeEntry = {
   id: string;
@@ -39,14 +43,23 @@ export default function IncomePage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchEntries = async () => {
-    setLoading(true);
-    const [data, userData] = await Promise.all([
-      getMonthlyFreelanceIncome(month, year),
-      getUserIncome(),
-    ]);
-    setEntries(data.entries as IncomeEntry[]);
-    setCurrency(userData.currency);
-    setLoading(false);
+    try {
+      setLoading(true);
+
+      const [data, userData] = await Promise.all([
+        getMonthlyFreelanceIncome(month, year),
+        getUserIncome(),
+      ]);
+
+      setEntries((data.entries ?? []) as IncomeEntry[]);
+      setCurrency(userData?.currency ?? "INR");
+    } catch (error) {
+      console.error("Failed to load income entries:", error);
+      toast.error("Failed to load income data. Please refresh.");
+      setEntries([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -56,9 +69,10 @@ export default function IncomePage() {
   const filtered = useMemo(() => {
     let result = [...entries];
 
-    if (search) {
-      result = result.filter((e) =>
-        e.sourceName.toLowerCase().includes(search.toLowerCase())
+    if (search.trim()) {
+      const query = search.trim().toLowerCase();
+      result = result.filter((entry) =>
+        entry.sourceName.toLowerCase().includes(query)
       );
     }
 
@@ -76,41 +90,54 @@ export default function IncomePage() {
     return result;
   }, [entries, search, sortBy]);
 
-  const totalEarned = entries.reduce((sum, e) => sum + e.amount, 0);
+  const totalEarned = entries.reduce((sum, entry) => sum + entry.amount, 0);
   const symbol = getCurrencySymbol(currency);
 
   const handleDelete = async () => {
     if (!deletingId) return;
-    setDeleteLoading(true);
 
-    // Optimistic update
-    setEntries((prev) => prev.filter((e) => e.id !== deletingId));
+    const idToDelete = deletingId;
+    setDeleteLoading(true);
+    setEntries((prev) => prev.filter((entry) => entry.id !== idToDelete));
     setDeletingId(null);
 
-    const result = await deleteFreelanceIncome(deletingId);
-    if (result?.error) {
+    try {
+      const result = await deleteFreelanceIncome(idToDelete);
+
+      if (result?.error) {
+        toast.error("Failed to delete. Please refresh.");
+        fetchEntries();
+        return;
+      }
+
+      toast.success("Income entry deleted!");
+    } catch (error) {
+      console.error("Failed to delete income entry:", error);
       toast.error("Failed to delete. Please refresh.");
       fetchEntries();
-    } else {
-      toast.success("Income entry deleted!");
+    } finally {
+      setDeleteLoading(false);
     }
-    setDeleteLoading(false);
   };
 
   return (
     <>
-      <div className="px-6 md:px-12 lg:px-20 pt-6 space-y-4">
+      <div className="px-4 md:px-12 lg:px-20 pt-6 space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-bold text-white">Income</h2>
             <p className="text-xs text-slate-400">
               {entries.length} entr{entries.length !== 1 ? "ies" : "y"} this month
             </p>
           </div>
+
           <Button
-            onClick={() => { setEditingEntry(null); setShowForm(true); }}
-            className="bg-white hover:bg-white/90 text-black gap-2"
+            onClick={() => {
+              setEditingEntry(null);
+              setShowForm(true);
+            }}
+            className="w-full sm:w-auto bg-white hover:bg-white/90 text-black gap-2 text-sm"
           >
             <PlusCircle className="h-4 w-4" />
             Add Income
@@ -122,49 +149,54 @@ export default function IncomePage() {
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl border border-emerald-500/20 bg-emerald-600/10 p-4 flex items-center justify-between"
+            className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-xl shadow-black/20 backdrop-blur-xl"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600/20">
-                <TrendingUp className="h-5 w-5 text-emerald-400" />
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5">
+                  <TrendingUp className="h-5 w-5 text-white" strokeWidth={2.2} />
+                </div>
+
+                <div>
+                  <p className="text-xs text-slate-500">Total Earned This Month</p>
+                  <p className="text-xl font-bold text-white">
+                    {symbol}{totalEarned.toLocaleString()}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-slate-400">Total Earned This Month</p>
-                <p className="text-xl font-bold text-emerald-400">
-                  {symbol}{totalEarned.toLocaleString()}
-                </p>
+
+              <div className="hidden rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-slate-400 sm:block">
+                Freelance income
               </div>
             </div>
           </motion.div>
         )}
 
         {/* Search + Sort */}
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
             <Input
-              placeholder="Search Income Entries"
+              placeholder="Search income entries"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 w-full h-10"
+              className="h-10 w-full border-white/10 bg-white/5 pl-9 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/30"
             />
           </div>
+
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="sm:w-36 px-3 py-2 h-10 rounded-lg bg-black-80 border border-white/10 text-white text-sm focus:outline-none focus:border-white/50 cursor-pointer"
+            className="h-10 w-full cursor-pointer rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-36"
           >
-            <option value="newest" className="bg-slate-900">Newest</option>
-            <option value="highest" className="bg-slate-900">Highest</option>
-            <option value="lowest" className="bg-slate-900">Lowest</option>
+            <option value="newest" className="bg-black">Newest</option>
+            <option value="highest" className="bg-black">Highest</option>
+            <option value="lowest" className="bg-black">Lowest</option>
           </select>
         </div>
 
         {/* Income List */}
-        <div
-          className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden flex flex-col mb-3"
-          style={{ height: "calc(100vh - 390px)", minHeight: "300px" }}
-        >
+        <div className="flex min-h-[300px] h-[calc(100vh-390px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 mb-3">
           {loading ? (
             <div className="space-y-3 p-4">
               {[...Array(4)].map((_, i) => (
@@ -172,27 +204,46 @@ export default function IncomePage() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
-              <EmptyState
-                icon="💰"
-                title="No income added yet"
-                description={
-                  search
-                    ? "Try adjusting your search"
-                    : "Add your earnings for this month to start tracking"
-                }
-                actionLabel={!search ? "Add Income" : undefined}
-                onAction={() => { setEditingEntry(null); setShowForm(true); }}
-              />
+            <div className="flex flex-1 items-center justify-center px-4 py-12">
+              <div className="flex max-w-sm flex-col items-center text-center">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                  <WalletCards className="h-6 w-6 text-white" strokeWidth={2.2} />
+                </div>
+
+                <h3 className="text-sm font-semibold text-white">
+                  {search ? "No matching income found" : "No income added yet"}
+                </h3>
+
+                <p className="mt-1 max-w-xs text-xs leading-relaxed text-slate-400">
+                  {search
+                    ? "Try a different search term or clear your search."
+                    : "Add your earnings for this month to start tracking your income."}
+                </p>
+
+                {!search && (
+                  <Button
+                    onClick={() => {
+                      setEditingEntry(null);
+                      setShowForm(true);
+                    }}
+                    className="mt-4 bg-white text-black hover:bg-white/90 text-sm"
+                  >
+                    Add Income
+                  </Button>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="overflow-y-auto flex-1 p-4 space-y-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div className="flex-1 space-y-2 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {filtered.map((entry, i) => (
                 <IncomeCard
                   key={entry.id}
                   entry={entry}
                   currency={currency}
-                  onEdit={(e) => { setEditingEntry(e); setShowForm(true); }}
+                  onEdit={(incomeEntry) => {
+                    setEditingEntry(incomeEntry);
+                    setShowForm(true);
+                  }}
                   onDelete={(id) => setDeletingId(id)}
                   index={i}
                 />
@@ -204,12 +255,16 @@ export default function IncomePage() {
 
       <IncomeFormDialog
         open={showForm}
-        onClose={() => { setShowForm(false); fetchEntries(); }}
+        onClose={() => {
+          setShowForm(false);
+          fetchEntries();
+        }}
         month={month}
         year={year}
         currency={currency}
         entry={editingEntry}
       />
+
       <ConfirmModal
         open={!!deletingId}
         onClose={() => setDeletingId(null)}
