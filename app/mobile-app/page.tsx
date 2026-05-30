@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 const APK_DOWNLOAD_URL =
-  "https://drive.google.com/uc?export=download&id=1mu-lVahkatef1toFzieCtqvVNsS2raMJ";
+  "https://drive.google.com/file/d/1mu-lVahkatef1toFzieCtqvVNsS2raMJ/view?usp=sharing";
 
 const screenshots = [
   {
