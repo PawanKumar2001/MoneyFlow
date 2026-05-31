@@ -148,8 +148,8 @@ export default function MobileAppPage() {
             <div className="relative rounded-[2.5rem] border border-white/10 bg-white/[0.04] p-3 shadow-2xl shadow-black/40 backdrop-blur-sm">
               <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-black">
                 <img
-                  src="/mobile-screenshots/expenses.jpg"
-                  alt="MoneyFlow Android expenses screen"
+                  src="/mobile-screenshots/login.jpg"
+                  alt="MoneyFlow Android login screen"
                   className="h-auto w-full object-cover"
                 />
               </div>
