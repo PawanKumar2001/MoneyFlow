@@ -82,16 +82,22 @@ export default function Navbar({
             {/* Brand */}
             <Link
               href="/dashboard"
-              className="group flex shrink-0 items-center rounded-2xl outline-none transition-opacity hover:opacity-95 focus-visible:ring-2 focus-visible:ring-emerald-300/30"
-              aria-label="Go to dashboard"
+              className="group flex min-w-0 items-center gap-3 rounded-2xl outline-none transition-opacity hover:opacity-95 focus-visible:ring-2 focus-visible:ring-emerald-300/30"
             >
-              <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#080b0b]/90 shadow-[0_0_26px_rgba(16,185,129,0.12)]">
-                <img
-                  src="/favicon.png"
-                  alt="MoneyFlow"
-                  className="h-7 w-7 rounded-xl"
-                />
-              </span>
+              <img
+                src="/favicon.png"
+                alt="MoneyFlow"
+                className="h-10 w-10 shrink-0 rounded-2xl border border-white/10"
+              />
+
+              <div className="hidden min-w-0 sm:block">
+                <p className="text-[11px] font-medium uppercase leading-none tracking-[0.22em] text-slate-500">
+                  Welcome back
+                </p>
+                <p className="mt-1.5 max-w-[150px] truncate text-sm font-semibold leading-none text-white">
+                  {username ?? "User"}
+                </p>
+              </div>
             </Link>
 
             {/* Mobile Month Selector */}
@@ -110,11 +116,10 @@ export default function Navbar({
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    className={`relative flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors xl:px-4 ${
-                      isActive
+                    className={`relative flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors xl:px-4 ${isActive
                         ? "text-white"
                         : "text-slate-400 hover:bg-white/[0.045] hover:text-white"
-                    }`}
+                      }`}
                   >
                     {isActive && (
                       <motion.span
@@ -246,18 +251,16 @@ export default function Navbar({
                     key={tab.href}
                     href={tab.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive
+                    className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition-colors ${isActive
                         ? "border-white/15 bg-white/[0.08] text-white"
                         : "border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
-                    }`}
+                      }`}
                   >
                     <span
-                      className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
-                        isActive
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl border ${isActive
                           ? "border-white/15 bg-white/[0.08]"
                           : "border-white/10 bg-white/[0.04]"
-                      }`}
+                        }`}
                     >
                       <Icon
                         className={`h-4.5 w-4.5 ${isActive ? iconAccent : "text-slate-400"}`}
