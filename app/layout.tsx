@@ -39,12 +39,19 @@ export default function RootLayout({
         className="min-h-screen overflow-x-hidden bg-black text-white antialiased"
         suppressHydrationWarning
       >
-        <div aria-hidden="true" className="pointer-events-none moneyflow-bg">
-          <div className="mf-glow mf-glow-green" />
-          <div className="mf-glow mf-glow-yellow" />
-          <div className="mf-glow mf-glow-white" />
-          <div className="mf-orbit-line" />
-          <div className="mf-orbit-line mf-orbit-line-secondary" />
+        {/* Global responsive background */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black"
+        >
+          <div
+            className="absolute inset-0 bg-[url('/backgrounds/moneyflow-bg.png')] bg-cover bg-[center_top] bg-no-repeat opacity-95 md:bg-center md:opacity-100"
+          />
+
+          {/* Keeps text/cards readable on every screen size */}
+          <div className="absolute inset-0 bg-black/25" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/25 to-black/75" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.22)_48%,rgba(0,0,0,0.78)_100%)]" />
         </div>
 
         <div className="relative z-10 flex min-h-screen flex-col">
