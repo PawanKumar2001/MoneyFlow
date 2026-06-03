@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyMobileToken } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { redis } from "@/lib/redis";
 
 const CACHE_TTL = 900; // 15 minutes — matches web app
@@ -11,21 +11,23 @@ function cacheKey(userId: string) {
   return `subscriptions:${userId}`;
 }
 
+function parseRequiredNumber(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 // GET /api/mobile/subscriptions
 export async function GET(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { user, error } = await requireMobileUser(req);
+    if (error) return error;
 
-    const payload = await verifyMobileToken(token);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-
-    const key = cacheKey(payload.userId);
+    const key = cacheKey(user.id);
     const cached = await redis.get(key);
     if (cached) return NextResponse.json({ subscriptions: cached });
 
     const subscriptions = await db.subscription.findMany({
-      where: { userId: payload.userId },
+      where: { userId: user.id },
       orderBy: { recurringDate: "asc" },
     });
 
@@ -41,26 +43,41 @@ export async function GET(req: NextRequest) {
 // POST /api/mobile/subscriptions
 export async function POST(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const payload = await verifyMobileToken(token);
-    if (!payload) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    const { user, error } = await requireMobileUser(req);
+    if (error) return error;
 
     const { name, amount, recurringDate, startMonth, startYear } = await req.json();
 
-    if (!name || !amount || !recurringDate || !startMonth || !startYear) {
+    const parsedAmount = parseRequiredNumber(amount);
+    const parsedRecurringDate = parseRequiredNumber(recurringDate);
+    const parsedStartMonth = parseRequiredNumber(startMonth);
+    const parsedStartYear = parseRequiredNumber(startYear);
+
+    if (
+      !name ||
+      parsedAmount === null ||
+      parsedRecurringDate === null ||
+      parsedStartMonth === null ||
+      parsedStartYear === null
+    ) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    }
+
+    if (parsedRecurringDate < 1 || parsedRecurringDate > 28) {
+      return NextResponse.json(
+        { error: "Recurring date must be between 1 and 28" },
+        { status: 400 }
+      );
     }
 
     const subscription = await db.subscription.create({
       data: {
-        userId: payload.userId,
+        userId: user.id,
         name,
-        amount: parseFloat(amount),
-        recurringDate: parseInt(recurringDate),
-        startMonth: parseInt(startMonth),
-        startYear: parseInt(startYear),
+        amount: parsedAmount,
+        recurringDate: parsedRecurringDate,
+        startMonth: parsedStartMonth,
+        startYear: parsedStartYear,
         isActive: true,
       },
     });
@@ -71,17 +88,22 @@ export async function POST(req: NextRequest) {
     const currentYear = now.getFullYear();
 
     const isActiveThisMonth =
-      startYear < currentYear ||
-      (startYear === currentYear && startMonth <= currentMonth);
+      parsedStartYear < currentYear ||
+      (parsedStartYear === currentYear && parsedStartMonth <= currentMonth);
 
     if (isActiveThisMonth) {
-      const expenseDate = new Date(currentYear, currentMonth - 1, Math.min(recurringDate, 28));
+      const expenseDate = new Date(
+        currentYear,
+        currentMonth - 1,
+        Math.min(parsedRecurringDate, 28)
+      );
+
       await db.expense.create({
         data: {
-          userId: payload.userId,
+          userId: user.id,
           name,
           category: "Utilities & Bills",
-          amount: parseFloat(amount),
+          amount: parsedAmount,
           date: expenseDate,
           month: currentMonth,
           year: currentYear,
@@ -90,12 +112,15 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Invalidate expenses cache for current month
-      await redis.del(`expenses:${payload.userId}:${currentMonth}:${currentYear}`);
+      // Invalidate expenses and summary cache for current month
+      await Promise.all([
+        redis.del(`expenses:${user.id}:${currentMonth}:${currentYear}`),
+        redis.del(`summary:${user.id}:${currentMonth}:${currentYear}`),
+      ]);
     }
 
     // Invalidate subscriptions cache
-    await redis.del(cacheKey(payload.userId));
+    await redis.del(cacheKey(user.id));
 
     return NextResponse.json({ subscription }, { status: 201 });
   } catch (error) {

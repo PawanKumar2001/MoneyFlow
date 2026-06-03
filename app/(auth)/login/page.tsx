@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { ArrowLeft, Mail, ShieldCheck } from "lucide-react";
+
 import { verifyCredentials, completeLogin } from "@/actions/auth";
 import { sendOTP, verifyOTP } from "@/actions/otp";
-import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import OTPInput from "@/components/shared/OTPInput";
 import PasswordInput from "@/components/shared/PasswordInput";
 
@@ -29,277 +30,285 @@ export default function LoginPage() {
   const [resendLoading, setResendLoading] = useState(false);
   const [email, setEmail] = useState("");
 
-  const { register, handleSubmit, formState: { errors } } =
-    useForm<LoginFormData>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>();
 
   const onSubmit = async (data: LoginFormData) => {
-    setLoading(true);
-    setError(null);
-
-    // Step 1 — verify credentials only, no sign in yet
-    const result = await verifyCredentials(data);
-    if (result?.error) {
-      setError(result.error);
-      setLoading(false);
-      return;
-    }
-
-    // Step 2 — send OTP
     try {
+      setLoading(true);
+      setError(null);
+
+      const result = await verifyCredentials(data);
+
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+
       await sendOTP(data.email, "LOGIN");
       setEmail(data.email);
       setStep("otp");
-    } catch {
-      setError("Failed to send verification code. Please try again.");
+    } catch (err) {
+      console.error("Login failed:", err);
+      setError("Something went wrong while signing in. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleOTPComplete = async (code: string) => {
-    setOtpLoading(true);
-    setError(null);
+    try {
+      setOtpLoading(true);
+      setError(null);
 
-    // Verify OTP
-    const verification = await verifyOTP(email, code, "LOGIN");
-    if (!verification.success) {
-      setError(verification.error ?? "Invalid code.");
+      const verification = await verifyOTP(email, code, "LOGIN");
+
+      if (!verification.success) {
+        setError(verification.error ?? "Invalid verification code.");
+        return;
+      }
+
+      await completeLogin(email);
+    } catch (err) {
+      console.error("OTP verification failed:", err);
+      setError("Could not verify the code. Please try again.");
+    } finally {
       setOtpLoading(false);
-      return;
     }
-
-    // Complete login after OTP verified
-    await completeLogin(email);
-    setOtpLoading(false);
   };
 
   const handleResend = async () => {
-    setResendLoading(true);
-    setError(null);
     try {
+      setResendLoading(true);
+      setError(null);
       await sendOTP(email, "LOGIN");
-    } catch {
-      setError("Failed to resend code.");
+    } catch (err) {
+      console.error("Failed to resend OTP:", err);
+      setError("Failed to resend code. Please try again.");
     } finally {
       setResendLoading(false);
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="w-full max-w-md"
-    >
-      <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
-        <CardHeader className="text-center pb-2 pt-8">
-          <img
-            src="/favicon.png"
-            alt="MoneyFlow"
-            className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl mx-auto mb-2"
-          />
-          <AnimatePresence mode="wait">
-            {step === "form" ? (
-              <motion.div
-                key="form-header"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <h1 className="text-2xl font-bold text-white">
-                  Welcome back
-                </h1>
-                <p className="text-sm text-slate-400 mt-1">
-                  Sign in to MoneyFlow
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="otp-header"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <h1 className="text-2xl font-bold text-white">
-                  Check your email
-                </h1>
-                <p className="text-sm text-slate-400 mt-1">
-                  We sent a 6-digit code to{" "}
-                  <span className="text-white font-medium">{email}</span>
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </CardHeader>
+    <main className="relative z-10 flex min-h-[calc(100dvh-120px)] items-center justify-center px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="w-full max-w-md"
+      >
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/50">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_34%)]" />
 
-        <CardContent className="px-4 sm:px-8 pb-6 sm:pb-8 pt-4">
-          <AnimatePresence mode="wait">
+          <div className="relative px-5 pb-6 pt-6 sm:px-7 sm:pb-7 sm:pt-7">
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white text-black shadow-lg shadow-white/10">
+                {step === "form" ? (
+                  <ShieldCheck className="h-6 w-6" strokeWidth={2.3} />
+                ) : (
+                  <Mail className="h-6 w-6" strokeWidth={2.3} />
+                )}
+              </div>
 
-            {/* Step 1 — Login Form */}
-            {step === "form" && (
-              <motion.div
-                key="form"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-              >
-                {/* Google Button */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full border-white/10 bg-white/5 text-white hover:bg-white/10 mb-6"
-                  onClick={() =>
-                    signIn("google", { callbackUrl: "/dashboard" })
-                  }
+              <AnimatePresence mode="wait">
+                {step === "form" ? (
+                  <motion.div
+                    key="form-header"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                  >
+                    <h1 className="text-xl font-bold text-white sm:text-2xl">
+                      Welcome back
+                    </h1>
+                    <p className="mt-1 text-sm text-slate-400">
+                      Sign in to continue tracking your money.
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="otp-header"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                  >
+                    <h1 className="text-xl font-bold text-white sm:text-2xl">
+                      Check your email
+                    </h1>
+                    <p className="mx-auto mt-1 max-w-xs text-sm leading-relaxed text-slate-400">
+                      We sent a 6-digit code to{" "}
+                      <span className="font-medium text-white">{email}</span>
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {step === "form" && (
+                <motion.div
+                  key="form"
+                  initial={{ opacity: 0, x: 18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -18 }}
+                  transition={{ duration: 0.25 }}
                 >
-                  <GoogleIcon />
-                  Continue with Google
-                </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="mb-5 h-10 w-full rounded-xl"
+                    onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                  >
+                    <GoogleIcon />
+                    Continue with Google
+                  </Button>
 
-                {/* Divider */}
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-white/10" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-transparent px-2 text-slate-500">
-                      or
-                    </span>
-                  </div>
-                </div>
-
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <Label className="text-slate-300">Email</Label>
-                    <Input
-                      type="email"
-                      placeholder="you@example.com"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
-                      {...register("email", {
-                        required: "Email is required",
-                      })}
-                    />
-                    {errors.email && (
-                      <p className="text-xs text-red-400">
-                        {errors.email.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-slate-300">Password</Label>
-                      <Link
-                        href="/forgot-password"
-                        className="text-xs text-slate-400 hover:text-white transition-colors"
-                      >
-                        Forgot password?
-                      </Link>
+                  <div className="relative mb-5">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-white/10" />
                     </div>
-                    <PasswordInput
-                      placeholder="••••••••"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50 pr-10"
-                      {...register("password", { required: "Password is required" })}
-                    />
-                    {errors.password && (
-                      <p className="text-xs text-red-400">
-                        {errors.password.message}
-                      </p>
-                    )}
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-[#080808] px-2 text-slate-500">or</span>
+                    </div>
                   </div>
 
-                  {error && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-sm text-red-400 text-center"
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-slate-300">Email</Label>
+                      <Input
+                        type="email"
+                        placeholder="you@example.com"
+                        className="h-10 border-white/10 bg-white/[0.04] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                        {...register("email", {
+                          required: "Email is required",
+                        })}
+                      />
+                      {errors.email && (
+                        <p className="text-xs text-red-400">
+                          {errors.email.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className="text-xs text-slate-300">Password</Label>
+                        <Link
+                          href="/forgot-password"
+                          className="text-xs text-slate-500 transition-colors hover:text-white"
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
+
+                      <PasswordInput
+                        placeholder="••••••••"
+                        className="h-10 border-white/10 bg-white/[0.04] pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                      />
+
+                      {errors.password && (
+                        <p className="text-xs text-red-400">
+                          {errors.password.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {error && <ErrorMessage message={error} />}
+
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="h-10 w-full rounded-xl"
                     >
-                      {error}
-                    </motion.p>
+                      {loading ? "Sending code..." : "Sign In"}
+                    </Button>
+                  </form>
+
+                  <p className="mt-6 text-center text-sm text-slate-400">
+                    Don&apos;t have an account?{" "}
+                    <Link
+                      href="/signup"
+                      className="font-medium text-white transition-colors hover:text-slate-300"
+                    >
+                      Sign up
+                    </Link>
+                  </p>
+                </motion.div>
+              )}
+
+              {step === "otp" && (
+                <motion.div
+                  key="otp"
+                  initial={{ opacity: 0, x: 18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -18 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-5"
+                >
+                  <OTPInput onComplete={handleOTPComplete} disabled={otpLoading} />
+
+                  {error && <ErrorMessage message={error} />}
+
+                  {otpLoading && (
+                    <p className="text-center text-sm text-slate-400">
+                      Verifying...
+                    </p>
                   )}
 
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-white hover:bg-white/90 text-black transition-all"
-                  >
-                    {loading ? "Sending code..." : "Sign In"}
-                  </Button>
-                </form>
+                  <div className="flex flex-col items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={resendLoading}
+                      className="text-sm text-slate-400 transition-colors hover:text-white disabled:opacity-50"
+                    >
+                      {resendLoading ? "Sending..." : "Resend code"}
+                    </button>
 
-                <p className="mt-6 text-center text-sm text-slate-400">
-                  Don&apos;t have an account?{" "}
-                  <Link
-                    href="/signup"
-                    className="text-white hover:text-white/80 font-medium"
-                  >
-                    Sign up
-                  </Link>
-                </p>
-              </motion.div>
-            )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep("form");
+                        setError(null);
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs text-slate-500 transition-colors hover:text-slate-300"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      Back to login
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </motion.div>
+    </main>
+  );
+}
 
-            {/* Step 2 — OTP */}
-            {step === "otp" && (
-              <motion.div
-                key="otp"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-6"
-              >
-                <OTPInput
-                  onComplete={handleOTPComplete}
-                  disabled={otpLoading}
-                />
-
-                {error && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-sm text-red-400 text-center"
-                  >
-                    {error}
-                  </motion.p>
-                )}
-
-                {otpLoading && (
-                  <p className="text-sm text-slate-400 text-center">
-                    Verifying...
-                  </p>
-                )}
-
-                <div className="flex flex-col items-center gap-3">
-                  <button
-                    onClick={handleResend}
-                    disabled={resendLoading}
-                    className="text-sm text-slate-400 hover:text-white transition-colors disabled:opacity-50"
-                  >
-                    {resendLoading ? "Sending..." : "Resend code"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setStep("form");
-                      setError(null);
-                    }}
-                    className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
-                  >
-                    ← Back to login
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </CardContent>
-      </Card>
+function ErrorMessage({ message }: { message: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2"
+    >
+      <p className="text-center text-xs leading-relaxed text-red-300">{message}</p>
     </motion.div>
   );
 }
 
 function GoogleIcon() {
   return (
-    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
       <path
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
         fill="#4285F4"

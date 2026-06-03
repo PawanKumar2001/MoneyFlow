@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyMobileToken } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { redis } from "@/lib/redis";
 
 function expenseCacheKey(userId: string, month: number, year: number) {
@@ -47,24 +47,18 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
+    const { user, error } = await requireMobileUser(req);
 
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    if (error) return error;
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = await verifyMobileToken(token);
-
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
-    const expense = await db.expense.findUnique({
-      where: { id },
+    const expense = await db.expense.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
     });
 
-    if (!expense || expense.userId !== payload.userId) {
+    if (!expense) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
@@ -97,8 +91,8 @@ export async function PATCH(
 
     // Clear caches for both old and new month
     await Promise.all([
-      clearCaches(payload.userId, expense.month, expense.year),
-      clearCaches(payload.userId, month, year),
+      clearCaches(user.id, expense.month, expense.year),
+      clearCaches(user.id, month, year),
     ]);
 
     return NextResponse.json({ expense: updated });
@@ -119,24 +113,18 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    const { user, error } = await requireMobileUser(req);
 
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    if (error) return error;
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = await verifyMobileToken(token);
-
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
-    const expense = await db.expense.findUnique({
-      where: { id },
+    const expense = await db.expense.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
     });
 
-    if (!expense || expense.userId !== payload.userId) {
+    if (!expense) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
@@ -145,7 +133,7 @@ export async function DELETE(
     });
 
     // Clear both expenses and summary cache
-    await clearCaches(payload.userId, expense.month, expense.year);
+    await clearCaches(user.id, expense.month, expense.year);
 
     return NextResponse.json({ success: true });
   } catch (error) {

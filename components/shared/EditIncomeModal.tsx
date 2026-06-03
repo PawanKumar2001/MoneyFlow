@@ -7,7 +7,7 @@ import { getCurrencySymbol } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
+import { Plus, Trash2, Wallet, X } from "lucide-react";
 import { toast } from "sonner";
 
 type IncomeEntry = {
@@ -58,160 +58,244 @@ export default function EditIncomeModal({ open, onClose, currency }: Props) {
   const totalIncome =
     (Number(watchedData.primaryIncome?.amount) || 0) +
     watchedData.secondaryIncomes.reduce(
-      (sum, inc) => sum + (Number(inc.amount) || 0),
+      (sum, income) => sum + (Number(income.amount) || 0),
       0
     );
 
   useEffect(() => {
     if (!open) return;
-    const fetch = async () => {
-      setFetching(true);
-      const data = await getUserIncome();
-      const primary = data.incomes.find((i: IncomeRecord) => i.type === "PRIMARY");
-      const secondary = data.incomes.filter((i: IncomeRecord) => i.type === "SECONDARY");
-      reset({
-        primaryIncome: {
-          id: primary?.id,
-          sourceName: primary?.sourceName ?? "",
-          amount: primary?.amount ?? 0,
-        },
-        secondaryIncomes: secondary.map((i: IncomeRecord) => ({
-          id: i.id,
-          sourceName: i.sourceName,
-          amount: i.amount,
-        })),
-      });
-      setFetching(false);
+
+    let mounted = true;
+
+    const fetchIncome = async () => {
+      try {
+        setFetching(true);
+        setError(null);
+
+        const data = await getUserIncome();
+        if (!mounted) return;
+
+        const incomes = Array.isArray(data?.incomes) ? data.incomes : [];
+        const primary = incomes.find((income: IncomeRecord) => income.type === "PRIMARY");
+        const secondary = incomes.filter((income: IncomeRecord) => income.type === "SECONDARY");
+
+        reset({
+          primaryIncome: {
+            id: primary?.id,
+            sourceName: primary?.sourceName ?? "",
+            amount: primary?.amount ?? 0,
+          },
+          secondaryIncomes: secondary.map((income: IncomeRecord) => ({
+            id: income.id,
+            sourceName: income.sourceName,
+            amount: income.amount,
+          })),
+        });
+      } catch (err) {
+        console.error("Failed to load income:", err);
+        if (mounted) {
+          setError("Could not load income details. Please try again.");
+        }
+      } finally {
+        if (mounted) setFetching(false);
+      }
     };
-    fetch();
-  }, [open]);
+
+    fetchIncome();
+
+    return () => {
+      mounted = false;
+    };
+  }, [open, reset]);
 
   const onSubmit = async (data: FormData) => {
-    setLoading(true);
-    setError(null);
-    const result = await updateIncome(data);
-    if (result?.error) {
-      setError(result.error);
-    } else {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await updateIncome(data);
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+
       toast.success("Income updated!");
       onClose(true);
+    } catch (err) {
+      console.error("Failed to update income:", err);
+      setError("Could not update income. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => onClose(false)} />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-black/90 p-6 shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-white">Edit Income</h2>
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+      <button
+        type="button"
+        aria-label="Close edit income modal"
+        className="fixed inset-0 cursor-default bg-black/80 backdrop-blur-sm"
+        onClick={() => onClose(false)}
+      />
+
+      <div className="relative z-10 flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-white/10 bg-[#080808]/98 shadow-2xl shadow-black/70 sm:max-w-lg sm:rounded-2xl">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+        <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5 sm:p-6">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white">
+              <Wallet className="h-5 w-5" strokeWidth={2.2} />
+            </div>
+
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-white">Edit Income</h2>
+              <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                Update your fixed monthly income sources.
+              </p>
+            </div>
+          </div>
+
           <button
+            type="button"
             onClick={() => onClose(false)}
-            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+            aria-label="Close edit income modal"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {fetching ? (
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-10 rounded-lg bg-white/5 animate-pulse" />
+          <div className="space-y-3 p-5 sm:p-6">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="h-10 animate-pulse rounded-xl bg-white/5" />
             ))}
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Primary Income */}
-            <div className="space-y-3">
-              <Label className="text-slate-300 text-sm font-medium">
-                Primary Income
-              </Label>
-              <Input
-                placeholder="Source name e.g. Salary"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
-                {...register("primaryIncome.sourceName", { required: true })}
-              />
-              <Input
-                type="number"
-                placeholder="Amount"
-                className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
-                {...register("primaryIncome.amount", { required: true, min: 1 })}
-              />
-            </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5 sm:p-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+              <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-3">
+                <div>
+                  <Label className="text-xs font-medium text-slate-300">Primary Income</Label>
+                  <p className="mt-0.5 text-xs text-slate-500">Your main fixed monthly income.</p>
+                </div>
 
-            {/* Secondary Incomes */}
-            <div className="space-y-3">
-              <Label className="text-slate-300 text-sm font-medium">
-                Secondary Income
-              </Label>
-              <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="flex gap-2 items-center">
-                    <div className="flex-1 space-y-2">
-                      <Input
-                        placeholder="Source name"
-                        className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
-                        {...register(`secondaryIncomes.${index}.sourceName`)}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Amount"
-                        className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
-                        {...register(`secondaryIncomes.${index}.amount`)}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => remove(index)}
-                      className="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
+                <Input
+                  placeholder="Source name e.g. Salary"
+                  className="h-10 border-white/10 bg-white/[0.04] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/30"
+                  {...register("primaryIncome.sourceName", { required: true })}
+                />
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="Amount"
+                  className="h-10 border-white/10 bg-white/[0.04] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/30"
+                  {...register("primaryIncome.amount", {
+                    valueAsNumber: true,
+                    required: true,
+                    min: 1,
+                  })}
+                />
               </div>
-              {fields.length < 5 && (
-                <button
-                  type="button"
-                  onClick={() => append({ sourceName: "", amount: 0 })}
-                  className="w-full py-2 rounded-lg border border-dashed border-white/20 text-slate-400 hover:text-white hover:border-white/40 text-sm transition-colors"
-                >
-                  + Add Income Source
-                </button>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <Label className="text-xs font-medium text-slate-300">Secondary Income</Label>
+                    <p className="mt-0.5 text-xs text-slate-500">Optional additional income sources.</p>
+                  </div>
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-slate-500">
+                    {fields.length}/5
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {fields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="rounded-2xl border border-white/10 bg-white/[0.025] p-3"
+                    >
+                      <div className="flex gap-2">
+                        <div className="flex-1 space-y-2">
+                          <Input
+                            placeholder="Source name"
+                            className="h-10 border-white/10 bg-white/[0.04] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/30"
+                            {...register(`secondaryIncomes.${index}.sourceName`)}
+                          />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="Amount"
+                            className="h-10 border-white/10 bg-white/[0.04] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/30"
+                            {...register(`secondaryIncomes.${index}.amount`, {
+                              valueAsNumber: true,
+                            })}
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => remove(index)}
+                          className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
+                          aria-label="Remove secondary income"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {fields.length < 5 && (
+                  <button
+                    type="button"
+                    onClick={() => append({ sourceName: "", amount: 0 })}
+                    className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] text-sm text-slate-400 transition-colors hover:border-white/30 hover:bg-white/[0.04] hover:text-white"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Income Source
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                <div>
+                  <p className="text-xs text-slate-500">Total Monthly Income</p>
+                  <p className="text-sm font-medium text-white">All fixed sources combined</p>
+                </div>
+                <span className="text-right text-base font-bold text-white">
+                  {symbol}{totalIncome.toLocaleString()}
+                </span>
+              </div>
+
+              {error && (
+                <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-center text-xs text-red-300">
+                  {error}
+                </div>
               )}
             </div>
 
-            {/* Total */}
-            <div className="flex justify-between items-center p-3 rounded-xl bg-indigo-600/20 border border-indigo-500/30">
-              <span className="text-white text-sm font-medium">Total Monthly Income</span>
-              <span className="text-indigo-300 font-bold">
-                {symbol}{totalIncome.toLocaleString()}
-              </span>
-            </div>
-
-            {error && (
-              <p className="text-sm text-red-400 text-center">{error}</p>
-            )}
-
-            <div className="flex gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 border-white/10 text-slate-300 hover:bg-white/5"
-                onClick={() => onClose(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-white hover:bg-white/90 text-black"
-              >
-                {loading ? "Saving..." : "Save Income"}
-              </Button>
+            <div className="border-t border-white/10 p-5 sm:p-6">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 w-full sm:flex-1"
+                  onClick={() => onClose(false)}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="h-10 w-full sm:flex-1"
+                >
+                  {loading ? "Saving..." : "Save Income"}
+                </Button>
+              </div>
             </div>
           </form>
         )}

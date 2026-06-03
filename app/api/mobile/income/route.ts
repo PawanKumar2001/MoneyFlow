@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyMobileToken } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { redis } from "@/lib/redis";
 
 const CACHE_TTL = 1800; // 30 minutes
@@ -27,17 +27,8 @@ function parseRequiredNumber(value: unknown) {
 // GET /api/mobile/income
 export async function GET(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = await verifyMobileToken(token);
-
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    const { user, error } = await requireMobileUser(req);
+    if (error) return error;
 
     const { searchParams } = new URL(req.url);
 
@@ -54,8 +45,8 @@ export async function GET(req: NextRequest) {
       Number.isFinite(year);
 
     const key = hasValidMonthYear
-      ? incomeCacheKey(payload.userId, month, year)
-      : incomeCacheKey(payload.userId);
+      ? incomeCacheKey(user.id, month, year)
+      : incomeCacheKey(user.id);
 
     const cached = await redis.get(key);
 
@@ -68,7 +59,7 @@ export async function GET(req: NextRequest) {
       month?: number;
       year?: number;
     } = {
-      userId: payload.userId,
+      userId: user.id,
     };
 
     if (hasValidMonthYear) {
@@ -97,17 +88,8 @@ export async function GET(req: NextRequest) {
 // POST /api/mobile/income
 export async function POST(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = await verifyMobileToken(token);
-
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    const { user, error } = await requireMobileUser(req);
+    if (error) return error;
 
     const { sourceName, amount, month, year, type } = await req.json();
 
@@ -124,7 +106,7 @@ export async function POST(req: NextRequest) {
 
     const income = await db.income.create({
       data: {
-        userId: payload.userId,
+        userId: user.id,
         sourceName,
         amount: parsedAmount,
         month: parsedMonth,
@@ -135,9 +117,9 @@ export async function POST(req: NextRequest) {
 
     // Clear income and summary cache
     await Promise.all([
-      redis.del(incomeCacheKey(payload.userId, parsedMonth, parsedYear)),
-      redis.del(incomeCacheKey(payload.userId)),
-      redis.del(summaryCacheKey(payload.userId, parsedMonth, parsedYear)),
+      redis.del(incomeCacheKey(user.id, parsedMonth, parsedYear)),
+      redis.del(incomeCacheKey(user.id)),
+      redis.del(summaryCacheKey(user.id, parsedMonth, parsedYear)),
     ]);
 
     return NextResponse.json({ income }, { status: 201 });

@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyMobileToken } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { redis } from "@/lib/redis";
 
 async function clearCaches(userId: string, month: number, year: number) {
@@ -45,23 +45,17 @@ export async function PATCH(
   try {
     const { id } = await params;
 
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    const { user, error } = await requireMobileUser(req);
+    if (error) return error;
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = await verifyMobileToken(token);
-
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
-    const income = await db.income.findUnique({
-      where: { id },
+    const income = await db.income.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
     });
 
-    if (!income || income.userId !== payload.userId) {
+    if (!income) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
@@ -80,16 +74,16 @@ export async function PATCH(
 
     // Clear caches for the old month/year if they exist
     if (income.month !== null && income.year !== null) {
-      await clearCaches(payload.userId, income.month, income.year);
+      await clearCaches(user.id, income.month, income.year);
     } else {
-      await clearSalariedIncomeCache(payload.userId);
+      await clearSalariedIncomeCache(user.id);
     }
 
     // Clear caches for the updated month/year if they exist
     if (updated.month !== null && updated.year !== null) {
-      await clearCaches(payload.userId, updated.month, updated.year);
+      await clearCaches(user.id, updated.month, updated.year);
     } else {
-      await clearSalariedIncomeCache(payload.userId);
+      await clearSalariedIncomeCache(user.id);
     }
 
     return NextResponse.json({ income: updated });
@@ -111,23 +105,17 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    const { user, error } = await requireMobileUser(req);
+    if (error) return error;
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = await verifyMobileToken(token);
-
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
-
-    const income = await db.income.findUnique({
-      where: { id },
+    const income = await db.income.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
     });
 
-    if (!income || income.userId !== payload.userId) {
+    if (!income) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
@@ -137,9 +125,9 @@ export async function DELETE(
 
     // Clear income and summary cache only when month/year exist
     if (income.month !== null && income.year !== null) {
-      await clearCaches(payload.userId, income.month, income.year);
+      await clearCaches(user.id, income.month, income.year);
     } else {
-      await clearSalariedIncomeCache(payload.userId);
+      await clearSalariedIncomeCache(user.id);
     }
 
     return NextResponse.json({ success: true });

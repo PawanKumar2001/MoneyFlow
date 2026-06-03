@@ -2,15 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSearchParams, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { validateResetToken, resetPassword } from "@/actions/password-reset";
+import { resetPassword, validateResetToken } from "@/actions/password-reset";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import PasswordInput from "@/components/shared/PasswordInput";
+import {
+  ArrowLeft,
+  Check,
+  CircleAlert,
+  KeyRound,
+  LoaderCircle,
+} from "lucide-react";
 
 type FormData = {
   password: string;
@@ -29,11 +34,18 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [tokenError, setTokenError] = useState("");
 
-  const { register, handleSubmit, watch, formState: { errors } } =
-    useForm<FormData>();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormData>();
+
   const password = watch("password");
 
   useEffect(() => {
+    let mounted = true;
+
     if (!token) {
       setTokenError("Invalid reset link.");
       setStep("invalid");
@@ -41,114 +53,145 @@ export default function ResetPasswordPage() {
     }
 
     const validate = async () => {
-      const result = await validateResetToken(token);
-      if (!result.valid) {
-        setTokenError(result.error ?? "Invalid reset link.");
-        setStep("invalid");
-      } else {
+      try {
+        const result = await validateResetToken(token);
+
+        if (!mounted) return;
+
+        if (!result.valid) {
+          setTokenError(result.error ?? "Invalid reset link.");
+          setStep("invalid");
+          return;
+        }
+
         setStep("form");
+      } catch (error) {
+        console.error("Failed to validate reset token:", error);
+
+        if (!mounted) return;
+
+        setTokenError("Could not verify this reset link. Please request a new one.");
+        setStep("invalid");
       }
     };
 
     validate();
+
+    return () => {
+      mounted = false;
+    };
   }, [token]);
 
   const onSubmit = async (data: FormData) => {
     if (!token) return;
-    setLoading(true);
-    setError(null);
 
-    const result = await resetPassword(token, data.password);
-    if (result?.error) {
-      setError(result.error);
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await resetPassword(token, data.password);
+
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+
+      setStep("success");
+      setTimeout(() => router.push("/login"), 3000);
+    } catch (error) {
+      console.error("Failed to reset password:", error);
+      setError("Something went wrong while resetting your password.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setStep("success");
-    setLoading(false);
-
-    // Redirect to login after 3 seconds
-    setTimeout(() => router.push("/login"), 3000);
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="w-full max-w-md"
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      className="flex min-h-[calc(100dvh-140px)] w-full items-center justify-center px-4 py-8"
     >
-      <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
-        <CardHeader className="text-center pb-2 pt-8">
-          <img
-            src="/favicon.png"
-            alt="MoneyFlow"
-            className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl mx-auto mb-2"
-          />
-          <AnimatePresence mode="wait">
-            {step === "loading" && (
-              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h1 className="text-2xl font-bold text-white">Verifying link...</h1>
-              </motion.div>
-            )}
-            {step === "form" && (
-              <motion.div key="form-header" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h1 className="text-2xl font-bold text-white">Reset password</h1>
-                <p className="text-sm text-slate-400 mt-1">
-                  Enter your new password below
-                </p>
-              </motion.div>
-            )}
-            {step === "success" && (
-              <motion.div key="success-header" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h1 className="text-2xl font-bold text-white">Password reset!</h1>
-                <p className="text-sm text-slate-400 mt-1">
-                  Redirecting you to login...
-                </p>
-              </motion.div>
-            )}
-            {step === "invalid" && (
-              <motion.div key="invalid-header" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h1 className="text-2xl font-bold text-white">Invalid link</h1>
-                <p className="text-sm text-slate-400 mt-1">
-                  This reset link is invalid or expired
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </CardHeader>
+      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/40">
+        <div className="relative px-5 pt-6 text-center sm:px-7 sm:pt-7">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_35%)]" />
 
-        <CardContent className="px-4 sm:px-8 pb-6 sm:pb-8 pt-4">
-          <AnimatePresence mode="wait">
+          <div className="relative">
+            <img
+              src="/favicon.png"
+              alt="MoneyFlow"
+              className="mx-auto mb-3 h-11 w-11 rounded-2xl border border-white/10"
+            />
 
-            {/* Loading */}
+            <AnimatePresence mode="wait">
+              {step === "loading" && (
+                <HeaderContent
+                  key="loading-header"
+                  icon={<LoaderCircle className="h-5 w-5 animate-spin" />}
+                  title="Verifying link"
+                  description="Checking whether your password reset link is still valid."
+                />
+              )}
+
+              {step === "form" && (
+                <HeaderContent
+                  key="form-header"
+                  icon={<KeyRound className="h-5 w-5" />}
+                  title="Reset password"
+                  description="Enter a new password for your MoneyFlow account."
+                />
+              )}
+
+              {step === "success" && (
+                <HeaderContent
+                  key="success-header"
+                  icon={<Check className="h-5 w-5" />}
+                  title="Password reset"
+                  description="Your password was updated. Redirecting you to login."
+                />
+              )}
+
+              {step === "invalid" && (
+                <HeaderContent
+                  key="invalid-header"
+                  icon={<CircleAlert className="h-5 w-5" />}
+                  title="Invalid link"
+                  description="This reset link is invalid, expired, or already used."
+                />
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        <div className="px-5 pb-6 pt-5 sm:px-7 sm:pb-7">
+          <AnimatePresence mode="wait">
             {step === "loading" && (
               <motion.div
                 key="loading"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex justify-center py-8"
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center justify-center gap-3 py-8"
               >
-                <div className="h-8 w-8 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/15 border-t-white" />
+                <p className="text-sm text-slate-400">Please wait...</p>
               </motion.div>
             )}
 
-            {/* Form */}
             {step === "form" && (
               <motion.div
                 key="form"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 18 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
+                exit={{ opacity: 0, x: -18 }}
               >
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label className="text-slate-300">New Password</Label>
-                    <Input
-                      type="password"
+                    <Label className="text-xs text-slate-300">New Password</Label>
+                    <PasswordInput
                       placeholder="••••••••"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
+                      className="h-10 border-white/10 bg-white/[0.04] pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/30"
                       {...register("password", {
                         required: "Password is required",
                         minLength: {
@@ -158,103 +201,133 @@ export default function ResetPasswordPage() {
                       })}
                     />
                     {errors.password && (
-                      <p className="text-xs text-red-400">
+                      <p className="text-xs text-red-300">
                         {errors.password.message}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-slate-300">Confirm Password</Label>
-                    <Input
-                      type="password"
+                    <Label className="text-xs text-slate-300">
+                      Confirm Password
+                    </Label>
+                    <PasswordInput
                       placeholder="••••••••"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/50"
+                      className="h-10 border-white/10 bg-white/[0.04] pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/30"
                       {...register("confirmPassword", {
                         required: "Please confirm your password",
-                        validate: (v) =>
-                          v === password || "Passwords do not match",
+                        validate: (value) =>
+                          value === password || "Passwords do not match",
                       })}
                     />
                     {errors.confirmPassword && (
-                      <p className="text-xs text-red-400">
+                      <p className="text-xs text-red-300">
                         {errors.confirmPassword.message}
                       </p>
                     )}
                   </div>
 
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="p-3 rounded-lg bg-red-500/10 border border-red-500/20"
-                    >
-                      <p className="text-sm text-red-400 text-center">{error}</p>
-                    </motion.div>
-                  )}
+                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                    <p className="text-xs leading-relaxed text-slate-400">
+                      Use at least 8 characters. After resetting, you can sign in
+                      with your new password immediately.
+                    </p>
+                  </div>
 
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-white hover:bg-white/90 text-black transition-all"
-                  >
+                  {error && <ErrorBox message={error} />}
+
+                  <Button type="submit" disabled={loading} className="h-10 w-full">
                     {loading ? "Resetting..." : "Reset Password"}
                   </Button>
                 </form>
               </motion.div>
             )}
 
-            {/* Success */}
             {step === "success" && (
               <motion.div
                 key="success"
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center space-y-4 py-4"
+                exit={{ opacity: 0 }}
+                className="space-y-5 py-3 text-center"
               >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                  className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 border border-white/20 mx-auto"
-                >
-                  <CheckCircle className="h-8 w-8 text-white" />
-                </motion.div>
-                <p className="text-sm text-slate-400">
-                  Your password has been successfully reset. You'll be redirected to login in a moment.
-                </p>
-                <Link
-                  href="/login"
-                  className="text-sm text-white hover:text-white/80 transition-colors"
-                >
-                  Go to login →
-                </Link>
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white text-black shadow-lg shadow-white/10">
+                  <Check className="h-7 w-7" strokeWidth={2.4} />
+                </div>
+
+                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-sm leading-relaxed text-slate-400">
+                    Your password has been successfully reset. You will be
+                    redirected to login in a moment.
+                  </p>
+                </div>
+
+                <Button asChild variant="secondary" className="h-10 w-full">
+                  <Link href="/login">Go to login</Link>
+                </Button>
               </motion.div>
             )}
 
-            {/* Invalid */}
             {step === "invalid" && (
               <motion.div
                 key="invalid"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center space-y-4 py-4"
+                exit={{ opacity: 0 }}
+                className="space-y-5 py-3 text-center"
               >
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <p className="text-sm text-red-400">{tokenError}</p>
-                </div>
-                <Link
-                  href="/forgot-password"
-                  className="flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Request a new reset link
-                </Link>
+                <ErrorBox message={tokenError} />
+
+                <Button asChild variant="secondary" className="h-10 w-full">
+                  <Link href="/forgot-password" className="gap-2">
+                    <ArrowLeft className="h-4 w-4" />
+                    Request a new reset link
+                  </Link>
+                </Button>
               </motion.div>
             )}
           </AnimatePresence>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function HeaderContent({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      className="mx-auto max-w-sm"
+    >
+      <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white">
+        {icon}
+      </div>
+      <h1 className="text-xl font-semibold text-white sm:text-2xl">{title}</h1>
+      <p className="mt-1 text-sm leading-relaxed text-slate-400">
+        {description}
+      </p>
+    </motion.div>
+  );
+}
+
+function ErrorBox({ message }: { message: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-xl border border-red-500/20 bg-red-500/10 p-3"
+    >
+      <p className="text-center text-sm text-red-300">{message}</p>
     </motion.div>
   );
 }

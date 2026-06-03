@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { updateCredentials } from "@/actions/profile";
-import { ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
+import { ArrowLeft, KeyRound, LockKeyhole, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import PasswordInput from "@/components/shared/PasswordInput";
 
@@ -56,7 +56,7 @@ export default function CredentialsPage() {
   };
 
   return (
-    <div className="flex items-center justify-center px-4 py-6 min-h-[calc(100dvh-140px)]">
+    <div className="flex items-center justify-center px-4 py-6 min-h-[calc(100dvh-112px)]">
       <div className="w-full max-w-md">
         <button
           type="button"
@@ -67,25 +67,27 @@ export default function CredentialsPage() {
           Back
         </button>
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl backdrop-blur-xl sm:p-6">
-          <div className="mb-5">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-              <KeyRound className="h-5 w-5 text-white" strokeWidth={2.2} />
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080808]/95 p-5 shadow-2xl shadow-black/40 sm:p-6">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_34%)]" />
+
+          <div className="relative mb-5">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white">
+              <KeyRound className="h-5 w-5" strokeWidth={2.2} />
             </div>
-            <h2 className="text-lg font-bold text-white">Change Credentials</h2>
+            <h2 className="text-lg font-bold text-white">Change Password</h2>
             <p className="mt-1 text-xs leading-relaxed text-slate-400">
               Update your password to keep your MoneyFlow account secure.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="relative space-y-4">
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-slate-300">
                 Current Password
               </Label>
               <PasswordInput
                 placeholder="••••••••"
-                className="h-10 border-white/10 bg-white/5 pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                className="h-10 border-white/10 bg-white/[0.04] pr-11 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
                 {...register("currentPassword", {
                   required: "Current password is required",
                 })}
@@ -103,7 +105,7 @@ export default function CredentialsPage() {
               </Label>
               <PasswordInput
                 placeholder="••••••••"
-                className="h-10 border-white/10 bg-white/5 pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                className="h-10 border-white/10 bg-white/[0.04] pr-11 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
                 {...register("newPassword", {
                   required: "New password is required",
                   minLength: { value: 8, message: "Minimum 8 characters" },
@@ -120,7 +122,7 @@ export default function CredentialsPage() {
               </Label>
               <PasswordInput
                 placeholder="••••••••"
-                className="h-10 border-white/10 bg-white/5 pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                className="h-10 border-white/10 bg-white/[0.04] pr-11 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
                 {...register("confirmPassword", {
                   required: "Please confirm your password",
                   validate: (v) => v === newPassword || "Passwords do not match",
@@ -133,12 +135,20 @@ export default function CredentialsPage() {
               )}
             </div>
 
-            <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
-              <p className="text-xs leading-relaxed text-slate-400">
-                Use at least 8 characters and avoid reusing passwords from other
-                websites.
-              </p>
+            <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/40">
+                <LockKeyhole className="h-4 w-4 text-white" strokeWidth={2.2} />
+              </div>
+              <div className="min-w-0">
+                <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-white">
+                  <ShieldCheck className="h-3.5 w-3.5 text-slate-300" />
+                  Password safety
+                </div>
+                <p className="text-xs leading-relaxed text-slate-400">
+                  Use at least 8 characters and avoid reusing passwords from other
+                  websites.
+                </p>
+              </div>
             </div>
 
             {error && (
@@ -150,7 +160,7 @@ export default function CredentialsPage() {
             {success && (
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
                 <p className="text-xs leading-relaxed text-slate-300">
-                  Password updated successfully.
+                  Password updated successfully. You can continue using MoneyFlow safely.
                 </p>
               </div>
             )}
@@ -159,7 +169,7 @@ export default function CredentialsPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="h-10 w-full rounded-xl border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/10 hover:text-white sm:flex-1"
+                className="h-10 w-full sm:flex-1"
                 onClick={() => router.back()}
               >
                 Cancel
@@ -167,7 +177,7 @@ export default function CredentialsPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="h-10 w-full rounded-xl bg-white text-black hover:bg-white/90 sm:flex-1"
+                className="h-10 w-full sm:flex-1"
               >
                 {loading ? "Updating..." : "Update Password"}
               </Button>

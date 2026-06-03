@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMonthStore } from "@/store/monthStore";
 import { getExpenses, deleteExpense } from "@/actions/expenses";
 import { getUserIncome, getMonthlyFreelanceIncome } from "@/actions/income";
-import { PlusCircle, ReceiptText, Search } from "lucide-react";
+import { Plus, ReceiptText, Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ExpenseCard from "@/components/expenses/ExpenseCard";
@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const [currency, setCurrency] = useState("INR");
   const [incomeType, setIncomeType] = useState("SALARIED");
   const [showEditIncome, setShowEditIncome] = useState(false);
+  const [summaryScrolled, setSummaryScrolled] = useState(false);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -86,6 +87,12 @@ export default function DashboardPage() {
     fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, year]);
+
+  useEffect(() => {
+    if (!search.trim()) {
+      setSummaryScrolled(false);
+    }
+  }, [search]);
 
   const filtered = useMemo(() => {
     let result = [...expenses];
@@ -122,6 +129,8 @@ export default function DashboardPage() {
   }, [expenses, search, categoryFilter, sortBy]);
 
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const isFiltering = Boolean(search.trim() || categoryFilter !== "All");
+  const shouldCollapseSummary = Boolean(summaryScrolled || search.trim());
 
   const handleDelete = async () => {
     if (!deletingId) return;
@@ -156,12 +165,11 @@ export default function DashboardPage() {
     setShowForm(true);
   };
 
-  const isFiltering = search.trim() || categoryFilter !== "All";
-
   return (
     <>
       <IncomeSummaryBar
         loading={loading}
+        collapsed={shouldCollapseSummary}
         totalIncome={totalIncome}
         totalExpenses={totalExpenses}
         currency={currency}
@@ -169,86 +177,113 @@ export default function DashboardPage() {
         onEditIncome={() => setShowEditIncome(true)}
       />
 
-      <div className="px-4 pt-6 pb-6 md:px-8 lg:px-12 xl:px-20 space-y-4">
+      <div className="space-y-4 px-4 pb-6 pt-5 md:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-lg font-bold text-white">Expenses</h2>
-            <p className="text-xs text-slate-400">
+            <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
+              Dashboard
+            </p>
+            <h2 className="text-lg font-semibold text-white">Expenses</h2>
+            <p className="mt-0.5 text-xs text-slate-500">
               {expenses.length} expense{expenses.length !== 1 ? "s" : ""} this month
             </p>
           </div>
 
-          <Button
-            onClick={openAddExpense}
-            className="w-full bg-white text-black hover:bg-white/90 gap-2 sm:w-auto"
-          >
-            <PlusCircle className="h-4 w-4" />
+          <Button onClick={openAddExpense} className="w-full gap-2 rounded-xl sm:w-auto">
+            <Plus className="h-4 w-4" />
             Add Expense
           </Button>
-        </div>
+        </section>
 
-        {/* Search + Filters */}
-        <div className="flex flex-col gap-2 lg:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-            <Input
-              placeholder="Search expenses"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              className="h-10 w-full border-white/10 bg-white/5 pl-9 text-white placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-white/30"
-            />
-          </div>
+        {/* Unified Search + Filters */}
+        <section className="rounded-2xl border border-white/10 bg-[#090909]/95 p-2 shadow-2xl shadow-black/20">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <Input
+                placeholder="Search expenses"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="h-10 w-full rounded-xl border-white/10 bg-white/[0.035] pl-9 text-white placeholder:text-slate-600 focus:border-white/30 focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:flex">
-            <select
-              value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-              className="h-10 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-48"
-            >
-              {CATEGORIES.map((category) => (
-                <option key={category} value={category} className="bg-black">
-                  {category}
+            <div className="grid grid-cols-2 gap-2 sm:flex">
+              <div className="relative">
+                <SlidersHorizontal className="pointer-events-none absolute left-3 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-slate-500 sm:block" />
+                <select
+                  value={categoryFilter}
+                  onChange={(event) => setCategoryFilter(event.target.value)}
+                  className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-52 sm:pl-9"
+                >
+                  {CATEGORIES.map((category) => (
+                    <option key={category} value={category} className="bg-black">
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value)}
+                className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-36"
+              >
+                <option value="newest" className="bg-black">
+                  Newest
                 </option>
-              ))}
-            </select>
-
-            <select
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value)}
-              className="h-10 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-36"
-            >
-              <option value="newest" className="bg-black">
-                Newest
-              </option>
-              <option value="oldest" className="bg-black">
-                Oldest
-              </option>
-              <option value="highest" className="bg-black">
-                Highest
-              </option>
-              <option value="lowest" className="bg-black">
-                Lowest
-              </option>
-            </select>
+                <option value="oldest" className="bg-black">
+                  Oldest
+                </option>
+                <option value="highest" className="bg-black">
+                  Highest
+                </option>
+                <option value="lowest" className="bg-black">
+                  Lowest
+                </option>
+              </select>
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* Expense List */}
-        <div className="flex min-h-[340px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] mb-3 md:h-[calc(100vh-440px)]">
+        <section className="flex min-h-[260px] max-h-[calc(100dvh-360px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/25 md:max-h-[560px]">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-white">Expense history</p>
+              <p className="text-xs text-slate-500">
+                {filtered.length} visible item{filtered.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+
+            {isFiltering && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setCategoryFilter("All");
+                }}
+                className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/[0.08] hover:text-white"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+
           {loading ? (
             <div className="space-y-3 p-4">
               {[...Array(4)].map((_, index) => (
                 <div
                   key={index}
-                  className="h-16 animate-pulse rounded-xl bg-white/5"
+                  className="h-16 animate-pulse rounded-xl border border-white/5 bg-white/[0.035]"
                 />
               ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-1 items-center justify-center px-5 py-12 text-center">
               <div className="flex max-w-sm flex-col items-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
                   <ReceiptText className="h-7 w-7 text-white" strokeWidth={2.2} />
                 </div>
 
@@ -263,17 +298,20 @@ export default function DashboardPage() {
                 </p>
 
                 {!isFiltering && (
-                  <Button
-                    onClick={openAddExpense}
-                    className="mt-5 bg-white text-black hover:bg-white/90"
-                  >
+                  <Button onClick={openAddExpense} className="mt-5 rounded-xl">
                     Add Expense
                   </Button>
                 )}
               </div>
             </div>
           ) : (
-            <div className="flex-1 space-y-2 overflow-y-auto p-3 sm:p-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+            <div
+              onScroll={(event) => {
+                if (window.innerWidth >= 768) return;
+                setSummaryScrolled(event.currentTarget.scrollTop > 8);
+              }}
+              className="flex-1 space-y-2 overflow-y-auto p-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 sm:p-4"
+            >
               {filtered.map((expense, index) => (
                 <ExpenseCard
                   key={expense.id}
@@ -289,7 +327,7 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-        </div>
+        </section>
       </div>
 
       <ExpenseFormDialog

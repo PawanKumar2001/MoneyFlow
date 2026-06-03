@@ -21,7 +21,7 @@ export default async function DashboardLayout({
   });
 
   return (
-    <div className="min-h-[calc(100vh-69px)] bg-transparent">
+    <div className="flex min-h-[calc(100dvh-97px)] flex-col bg-transparent">
       <Navbar
         username={user?.username ?? user?.name ?? null}
         email={user?.email ?? null}
@@ -29,7 +29,7 @@ export default async function DashboardLayout({
         incomeType={user?.incomeType ?? "SALARIED"}
       />
 
-      <main className="relative z-10 mx-auto w-full max-w-7xl">
+      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1">
         {children}
       </main>
 
@@ -37,9 +37,10 @@ export default async function DashboardLayout({
         position="bottom-right"
         toastOptions={{
           style: {
-            background: "#000000",
-            border: "1px solid rgba(255,255,255,0.15)",
+            background: "#050505",
+            border: "1px solid rgba(255,255,255,0.12)",
             color: "#ffffff",
+            borderRadius: "14px",
           },
           classNames: {
             success: "!border-white/20",

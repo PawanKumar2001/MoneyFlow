@@ -133,7 +133,7 @@ export default function SetupPage() {
 
   if (!incomeType) {
     return (
-      <div className="relative z-10 flex min-h-[calc(100vh-69px)] items-center justify-center px-4 py-8">
+      <div className="relative z-10 flex min-h-[calc(100dvh-69px)] items-center justify-center px-4 py-8">
         <div className="w-full max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -184,7 +184,7 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="relative z-10 flex min-h-[calc(100vh-69px)] items-center justify-center px-4 py-8">
+    <div className="relative z-10 flex min-h-[calc(100dvh-69px)] items-center justify-center px-4 py-8">
       <div className="w-full max-w-md sm:max-w-lg">
         <motion.div
           initial={{ opacity: 0, y: -16 }}
@@ -214,15 +214,16 @@ export default function SetupPage() {
             <ArrowLeft className="h-4 w-4" />
             Change income type
           </button>
-          <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-400">
+          <span className="shrink-0 rounded-full border border-white/10 bg-[#080808]/90 px-2.5 py-1 text-xs text-slate-400">
             Step {step + 1} of {steps.length}
           </span>
         </div>
 
         <StepIndicator steps={steps} currentStep={step} />
 
-        <div className="rounded-2xl border border-white/10 bg-black/40 shadow-2xl backdrop-blur-xl">
-          <div className="p-5 sm:p-6">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/30">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_34%)]" />
+          <div className="relative p-5 sm:p-6">
             <form onSubmit={handleSubmit(onSubmit)}>
               {completed ? (
                 <CompletionScreen />
@@ -290,7 +291,7 @@ export default function SetupPage() {
                             </Label>
                             <Input
                               placeholder="e.g. Salary"
-                              className="h-10 border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                              className="h-10 border-white/10 bg-[#0b0b0b] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
                               {...register("primaryIncome.sourceName", {
                                 required: "Source name is required",
                               })}
@@ -310,7 +311,7 @@ export default function SetupPage() {
                               type="number"
                               step="0.01"
                               placeholder="0.00"
-                              className="h-10 border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                              className="h-10 border-white/10 bg-[#0b0b0b] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
                               {...register("primaryIncome.amount", {
                                 valueAsNumber: true,
                                 required: "Amount is required",
@@ -352,13 +353,13 @@ export default function SetupPage() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className="rounded-xl border border-white/10 bg-white/[0.03] p-3"
+                                className="rounded-xl border border-white/10 bg-[#0b0b0b]/95 p-3"
                               >
                                 <div className="flex gap-2">
                                   <div className="flex-1 space-y-2">
                                     <Input
                                       placeholder="Source name"
-                                      className="h-10 border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                                      className="h-10 border-white/10 bg-[#0b0b0b] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
                                       {...register(
                                         `secondaryIncomes.${index}.sourceName`
                                       )}
@@ -367,7 +368,7 @@ export default function SetupPage() {
                                       type="number"
                                       step="0.01"
                                       placeholder="0.00"
-                                      className="h-10 border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                                      className="h-10 border-white/10 bg-[#0b0b0b] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
                                       {...register(
                                         `secondaryIncomes.${index}.amount`,
                                         { valueAsNumber: true }
@@ -400,7 +401,7 @@ export default function SetupPage() {
                         )}
 
                         {fields.length === 0 && (
-                          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-5 text-center">
+                          <div className="rounded-xl border border-white/10 bg-[#0b0b0b]/95 px-4 py-5 text-center">
                             <p className="text-sm text-slate-500">
                               No secondary income added
                             </p>
@@ -461,7 +462,7 @@ export default function SetupPage() {
                                 ) : null
                               )}
 
-                              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/20 bg-white/10 p-3">
+                              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-white/[0.06] p-3">
                                 <span className="text-sm font-medium text-white">
                                   Total Monthly Income
                                 </span>
@@ -481,9 +482,9 @@ export default function SetupPage() {
                             />
                           )}
 
-                          <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 sm:flex-row sm:items-center">
+                          <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-[#0b0b0b]/95 p-3 sm:flex-row sm:items-center">
                             <div className="flex flex-1 items-start gap-3">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-white">
                                 <Mail className="h-4 w-4" />
                               </div>
                               <div>
@@ -523,7 +524,7 @@ export default function SetupPage() {
                       <Button
                         type="button"
                         variant="outline"
-                        className="h-10 flex-1 border-white/10 text-slate-300 hover:bg-white/5"
+                        className="h-10 flex-1"
                         onClick={prevStep}
                       >
                         Back
@@ -533,7 +534,7 @@ export default function SetupPage() {
                     {step < steps.length - 1 ? (
                       <Button
                         type="button"
-                        className="h-10 flex-1 gap-2 bg-white text-black hover:bg-white/90"
+                        className="h-10 flex-1 gap-2"
                         onClick={nextStep}
                       >
                         Continue
@@ -543,7 +544,7 @@ export default function SetupPage() {
                       <Button
                         type="submit"
                         disabled={loading}
-                        className="h-10 flex-1 bg-white text-black hover:bg-white/90"
+                        className="h-10 flex-1"
                       >
                         {loading ? "Setting up..." : "Confirm Setup"}
                       </Button>
@@ -568,7 +569,7 @@ function IconBadge({
 }) {
   return (
     <div
-      className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white text-black shadow-lg shadow-white/10 ${className}`}
+      className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white shadow-lg shadow-black/20 ${className}`}
     >
       {children}
     </div>
@@ -596,9 +597,9 @@ function IncomeTypeCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
       onClick={onClick}
-      className="group rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-left transition-all duration-300 hover:border-white/30 hover:bg-white/[0.07] sm:p-6"
+      className="group rounded-2xl border border-white/10 bg-[#080808]/95 p-5 text-left shadow-xl shadow-black/20 transition-all duration-300 hover:border-white/25 hover:bg-[#0d0d0d] sm:p-6"
     >
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white text-black shadow-lg shadow-white/10">
+      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white shadow-lg shadow-black/20">
         {icon}
       </div>
       <h2 className="text-base font-semibold text-white sm:text-lg">{title}</h2>
@@ -608,7 +609,7 @@ function IncomeTypeCard({
       <ul className="mt-4 space-y-2">
         {items.map((item) => (
           <li key={item} className="flex items-center gap-2 text-xs text-slate-400">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white text-black">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-white">
               <Check className="h-3 w-3" strokeWidth={3} />
             </span>
             {item}
@@ -634,7 +635,7 @@ function StepIndicator({
             className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300 sm:h-8 sm:w-8 ${
               index <= currentStep
                 ? "bg-white text-black shadow-lg shadow-white/10"
-                : "bg-white/10 text-slate-500"
+                : "bg-white/[0.06] text-slate-500"
             }`}
           >
             {index < currentStep ? <Check className="h-3.5 w-3.5" /> : index + 1}
@@ -677,8 +678,8 @@ function InfoBox({
   description: string;
 }) {
   return (
-    <div className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white">
+    <div className="flex gap-3 rounded-xl border border-white/10 bg-[#0b0b0b]/95 p-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-white">
         {icon}
       </div>
       <div>
@@ -693,7 +694,7 @@ function InfoBox({
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#0b0b0b]/95 p-3">
       <span className="text-sm text-slate-400">{label}</span>
       <span className="text-right text-sm font-medium text-white">{value}</span>
     </div>
@@ -725,7 +726,7 @@ function CompletionScreen() {
         onClick={() => {
           window.location.href = "/dashboard";
         }}
-        className="mt-6 h-10 w-full gap-2 bg-white text-black hover:bg-white/90"
+        className="mt-6 h-10 w-full gap-2"
       >
         Go to Dashboard
         <ArrowRight className="h-4 w-4" />

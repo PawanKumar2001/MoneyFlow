@@ -90,3 +90,57 @@ export async function resetUserSetup() {
 
   return { success: true };
 }
+
+export async function deleteAccount() {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+
+  const userId = session.user.id;
+
+  try {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
+    if (!user?.email) {
+      return { error: "User not found." };
+    }
+
+    await db.$transaction(async (tx) => {
+      // These records are not connected to User by relation, so delete them by email.
+      await tx.verificationCode.deleteMany({
+        where: { email: user.email },
+      });
+
+      await tx.passwordResetToken.deleteMany({
+        where: { email: user.email },
+      });
+
+      // User-owned records are configured with onDelete: Cascade in Prisma,
+      // but we delete these explicitly to keep the action predictable.
+      await tx.income.deleteMany({ where: { userId } });
+      await tx.expense.deleteMany({ where: { userId } });
+      await tx.subscription.deleteMany({ where: { userId } });
+      await tx.account.deleteMany({ where: { userId } });
+      await tx.session.deleteMany({ where: { userId } });
+
+      await tx.user.delete({
+        where: { id: userId },
+      });
+    });
+
+    // Clear all Redis caches for this user after the database transaction succeeds.
+    await deleteCache(cacheKeys.income(userId));
+    await deleteCache(cacheKeys.subscriptions(userId));
+    await deleteCachePattern(`expenses:${userId}:*`);
+    await deleteCachePattern(`summary:${userId}:*`);
+    await deleteCachePattern(`trend:${userId}:*`);
+    await deleteCachePattern(`freelance-income:${userId}:*`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Delete account failed:", error);
+    return { error: "Failed to delete account. Please try again." };
+  }
+}

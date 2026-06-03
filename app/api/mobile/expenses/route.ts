@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyMobileToken } from "@/lib/mobile-auth";
+import { requireMobileUser } from "@/lib/mobile-auth";
 import { redis } from "@/lib/redis";
 
 const CACHE_TTL = 300; // 5 minutes
@@ -31,17 +31,9 @@ function parseRequiredDate(value: unknown) {
 // GET /api/mobile/expenses?month=5&year=2026
 export async function GET(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    const { user, error } = await requireMobileUser(req);
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = await verifyMobileToken(token);
-
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    if (error) return error;
 
     const { searchParams } = new URL(req.url);
 
@@ -55,7 +47,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const key = expenseCacheKey(payload.userId, month, year);
+    const key = expenseCacheKey(user.id, month, year);
     const cached = await redis.get(key);
 
     if (cached) {
@@ -64,7 +56,7 @@ export async function GET(req: NextRequest) {
 
     const expenses = await db.expense.findMany({
       where: {
-        userId: payload.userId,
+        userId: user.id,
         month,
         year,
       },
@@ -89,17 +81,9 @@ export async function GET(req: NextRequest) {
 // POST /api/mobile/expenses
 export async function POST(req: NextRequest) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    const { user, error } = await requireMobileUser(req);
 
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = await verifyMobileToken(token);
-
-    if (!payload) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-    }
+    if (error) return error;
 
     const { name, category, amount, date } = await req.json();
 
@@ -118,7 +102,7 @@ export async function POST(req: NextRequest) {
 
     const expense = await db.expense.create({
       data: {
-        userId: payload.userId,
+        userId: user.id,
         name,
         category,
         amount: parsedAmount,
@@ -132,8 +116,8 @@ export async function POST(req: NextRequest) {
 
     // Invalidate both expenses and summary cache
     await Promise.all([
-      redis.del(expenseCacheKey(payload.userId, month, year)),
-      redis.del(summaryCacheKey(payload.userId, month, year)),
+      redis.del(expenseCacheKey(user.id, month, year)),
+      redis.del(summaryCacheKey(user.id, month, year)),
     ]);
 
     return NextResponse.json({ expense }, { status: 201 });
