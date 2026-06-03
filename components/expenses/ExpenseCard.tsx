@@ -1,12 +1,24 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { ElementType } from "react";
 import {
   CalendarDays,
+  Car,
+  CircleEllipsis,
+  Film,
+  GraduationCap,
+  HeartPulse,
+  Home,
   PencilLine,
+  Plane,
   ReceiptText,
+  ShoppingBag,
+  ShoppingCart,
   Sparkles,
   Trash2,
+  Utensils,
+  Zap,
 } from "lucide-react";
 import { getCurrencySymbol, formatAmount } from "@/lib/currency";
 
@@ -27,18 +39,68 @@ type Props = {
   index: number;
 };
 
-const CATEGORY_STYLES: Record<string, string> = {
-  Grocery: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
-  "Food & Dining": "border-orange-500/20 bg-orange-500/10 text-orange-300",
-  Transportation: "border-blue-500/20 bg-blue-500/10 text-blue-300",
-  "Utilities & Bills": "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
-  Healthcare: "border-red-500/20 bg-red-500/10 text-red-300",
-  "Rent/Housing": "border-purple-500/20 bg-purple-500/10 text-purple-300",
-  Entertainment: "border-pink-500/20 bg-pink-500/10 text-pink-300",
-  Shopping: "border-cyan-500/20 bg-cyan-500/10 text-cyan-300",
-  Education: "border-indigo-500/20 bg-indigo-500/10 text-indigo-300",
-  Travel: "border-teal-500/20 bg-teal-500/10 text-teal-300",
-  Others: "border-white/10 bg-white/[0.04] text-slate-300",
+type CategoryMeta = {
+  icon: ElementType;
+  iconClass: string;
+  glowClass: string;
+};
+
+const CATEGORY_META: Record<string, CategoryMeta> = {
+  Grocery: {
+    icon: ShoppingCart,
+    iconClass: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
+    glowClass: "bg-emerald-500/10",
+  },
+  "Food & Dining": {
+    icon: Utensils,
+    iconClass: "border-amber-500/20 bg-amber-500/10 text-amber-300",
+    glowClass: "bg-amber-500/10",
+  },
+  Transportation: {
+    icon: Car,
+    iconClass: "border-sky-500/20 bg-sky-500/10 text-sky-300",
+    glowClass: "bg-sky-500/10",
+  },
+  "Utilities & Bills": {
+    icon: Zap,
+    iconClass: "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
+    glowClass: "bg-yellow-500/10",
+  },
+  Healthcare: {
+    icon: HeartPulse,
+    iconClass: "border-rose-500/20 bg-rose-500/10 text-rose-300",
+    glowClass: "bg-rose-500/10",
+  },
+  "Rent/Housing": {
+    icon: Home,
+    iconClass: "border-violet-500/20 bg-violet-500/10 text-violet-300",
+    glowClass: "bg-violet-500/10",
+  },
+  Entertainment: {
+    icon: Film,
+    iconClass: "border-pink-500/20 bg-pink-500/10 text-pink-300",
+    glowClass: "bg-pink-500/10",
+  },
+  Shopping: {
+    icon: ShoppingBag,
+    iconClass: "border-cyan-500/20 bg-cyan-500/10 text-cyan-300",
+    glowClass: "bg-cyan-500/10",
+  },
+  Education: {
+    icon: GraduationCap,
+    iconClass: "border-indigo-500/20 bg-indigo-500/10 text-indigo-300",
+    glowClass: "bg-indigo-500/10",
+  },
+  Travel: {
+    icon: Plane,
+    iconClass: "border-teal-500/20 bg-teal-500/10 text-teal-300",
+    glowClass: "bg-teal-500/10",
+  },
+  Others: {
+    icon: CircleEllipsis,
+    iconClass: "border-white/10 bg-white/[0.055] text-slate-300",
+    glowClass: "bg-white/5",
+  },
 };
 
 export default function ExpenseCard({
@@ -49,45 +111,50 @@ export default function ExpenseCard({
   index,
 }: Props) {
   const symbol = getCurrencySymbol(currency);
-  const categoryStyle =
-    CATEGORY_STYLES[expense.category] ?? CATEGORY_STYLES.Others;
+  const meta = CATEGORY_META[expense.category] ?? CATEGORY_META.Others;
+  const CategoryIcon = meta.icon;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.22, delay: index * 0.035 }}
-      className="group rounded-xl border border-white/10 bg-[#101010]/95 p-3 transition-all duration-200 hover:border-white/15 hover:bg-[#141414] sm:p-3.5"
+      transition={{ duration: 0.24, delay: index * 0.035, ease: "easeOut" }}
+      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0c0c0c]/95 transition-all duration-200 hover:border-white/15 hover:bg-[#111111] hover:shadow-xl hover:shadow-black/25"
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/40 text-white">
-            <ReceiptText className="h-4.5 w-4.5" strokeWidth={2.2} />
+      <div
+        className={`pointer-events-none absolute -left-16 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full blur-3xl ${meta.glowClass}`}
+      />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+
+      <div className="relative flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4.5">
+        <div className="flex min-w-0 items-start gap-3.5 sm:items-center">
+          <div
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border ${meta.iconClass}`}
+          >
+            <CategoryIcon className="h-5 w-5" strokeWidth={2.3} />
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <p className="min-w-0 truncate text-sm font-semibold text-white">
+              <p className="min-w-0 truncate text-base font-semibold text-white">
                 {expense.name}
               </p>
 
               {expense.autoGenerated && (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-slate-300">
-                  <Sparkles className="h-3 w-3" />
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-300">
+                  <Sparkles className="h-3 w-3" strokeWidth={2.4} />
                   Auto
                 </span>
               )}
             </div>
 
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-              <span
-                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${categoryStyle}`}
-              >
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500">
+              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.035] px-2.5 py-1 text-[11px] font-medium text-slate-300">
                 {expense.category}
               </span>
 
-              <span className="inline-flex items-center gap-1">
-                <CalendarDays className="h-3 w-3" />
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays className="h-3.5 w-3.5 text-slate-400" strokeWidth={2.2} />
                 {new Date(expense.date).toLocaleDateString("en-US", {
                   day: "numeric",
                   month: "short",
@@ -98,34 +165,36 @@ export default function ExpenseCard({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
-          <div className="text-left sm:text-right">
-            <p className="text-sm font-bold text-white sm:text-[15px]">
+        <div className="flex shrink-0 items-center justify-between gap-4 border-t border-white/10 pt-3 sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0">
+          <div className="min-w-[96px] text-left sm:text-right">
+            <p className="text-lg font-bold leading-none text-white">
               {symbol}
               {formatAmount(expense.amount)}
             </p>
-            <p className="text-[11px] text-slate-500">spent</p>
+            <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-slate-600">
+              Spent
+            </p>
           </div>
 
-          <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-black/35 p-1">
+          <div className="flex items-center gap-1 rounded-2xl border border-white/10 bg-black/45 p-1 shadow-inner shadow-black/30">
             {!expense.autoGenerated && (
               <button
                 type="button"
                 onClick={() => onEdit(expense)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white/10 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-sky-500/10 hover:text-sky-300"
                 aria-label="Edit expense"
               >
-                <PencilLine className="h-3.5 w-3.5" strokeWidth={2.2} />
+                <PencilLine className="h-4 w-4" strokeWidth={2.2} />
               </button>
             )}
 
             <button
               type="button"
               onClick={() => onDelete(expense.id)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-500/10 hover:text-red-300"
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-rose-500/10 hover:text-rose-300"
               aria-label="Delete expense"
             >
-              <Trash2 className="h-3.5 w-3.5" strokeWidth={2.2} />
+              <Trash2 className="h-4 w-4" strokeWidth={2.2} />
             </button>
           </div>
         </div>

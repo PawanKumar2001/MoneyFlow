@@ -24,6 +24,7 @@ import {
   Settings,
   TrendingUp,
   UserCircle,
+  WalletCards,
   X,
 } from "lucide-react";
 
@@ -32,6 +33,13 @@ type NavbarProps = {
   email: string | null;
   image: string | null;
   incomeType: string;
+};
+
+const iconAccentMap: Record<string, string> = {
+  Expenses: "text-emerald-300",
+  Income: "text-sky-300",
+  Subscriptions: "text-amber-300",
+  Summary: "text-violet-300",
 };
 
 export default function Navbar({
@@ -65,30 +73,29 @@ export default function Navbar({
   return (
     <>
       <motion.header
-        initial={{ y: -72, opacity: 0 }}
+        initial={{ y: -76, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#050505]/95 backdrop-blur-xl"
+        className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#030505]/88 shadow-[0_18px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl"
       >
-        <div className="mx-auto w-full max-w-7xl px-4 py-2 md:px-6 lg:px-8">
-          <div className="flex h-14 items-center justify-between gap-3">
+        <div className="mx-auto w-full max-w-[1480px] px-4 md:px-6 lg:px-8">
+          <div className="flex h-[72px] items-center justify-between gap-3 md:h-[76px]">
             {/* Brand */}
             <Link
               href="/dashboard"
-              className="flex min-w-0 items-center gap-3 rounded-xl outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white/20"
+              className="group flex min-w-0 items-center gap-3 rounded-2xl outline-none transition-opacity hover:opacity-95 focus-visible:ring-2 focus-visible:ring-emerald-300/30"
             >
-              <img
-                src="/favicon.png"
-                alt="MoneyFlow"
-                className="h-8 w-8 shrink-0 rounded-xl border border-white/10"
-              />
+              <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-emerald-300/20 bg-emerald-400/10 text-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.16)]">
+                <WalletCards className="h-5 w-5" strokeWidth={2.3} />
+                <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(110,231,183,0.9)]" />
+              </span>
 
               <div className="hidden min-w-0 sm:block">
-                <p className="text-[11px] leading-none text-slate-500">
-                  Welcome back
+                <p className="text-[11px] font-semibold uppercase leading-none tracking-[0.28em] text-slate-500">
+                  MoneyFlow
                 </p>
-                <p className="mt-1 max-w-[150px] truncate text-sm font-semibold leading-none text-white">
-                  {username ?? "User"}
+                <p className="mt-1.5 max-w-[180px] truncate text-sm font-semibold leading-none text-white">
+                  {username ? `Welcome, ${username}` : "Welcome back"}
                 </p>
               </div>
             </Link>
@@ -99,25 +106,26 @@ export default function Navbar({
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden items-center rounded-2xl border border-white/10 bg-white/[0.035] p-1 md:flex">
+            <nav className="hidden items-center gap-1 rounded-2xl border border-white/10 bg-[#080b0b]/80 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:flex">
               {NAV_TABS.map((tab) => {
                 const isActive = pathname === tab.href;
                 const Icon = tab.icon;
+                const iconAccent = iconAccentMap[tab.label] ?? "text-slate-300";
 
                 return (
                   <Link
                     key={tab.href}
                     href={tab.href}
-                    className={`relative flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                    className={`relative flex h-11 items-center gap-2.5 rounded-xl px-4 text-sm font-semibold transition-colors lg:px-5 ${
                       isActive
                         ? "text-white"
-                        : "text-slate-400 hover:bg-white/[0.05] hover:text-white"
+                        : "text-slate-400 hover:bg-white/[0.045] hover:text-white"
                     }`}
                   >
                     {isActive && (
                       <motion.span
                         layoutId="navbar-active-tab"
-                        className="absolute inset-0 rounded-xl border border-white/10 bg-white/[0.08]"
+                        className="absolute inset-0 rounded-xl border border-white/10 bg-white/[0.08] shadow-[0_10px_32px_rgba(0,0,0,0.24)]"
                         transition={{
                           type: "spring",
                           bounce: 0.18,
@@ -126,7 +134,17 @@ export default function Navbar({
                       />
                     )}
 
-                    <Icon className="relative z-10 h-4 w-4" strokeWidth={2.2} />
+                    {isActive && (
+                      <motion.span
+                        layoutId="navbar-active-line"
+                        className="absolute -bottom-1.5 left-3 right-3 h-px rounded-full bg-emerald-300 shadow-[0_0_16px_rgba(110,231,183,0.85)]"
+                      />
+                    )}
+
+                    <Icon
+                      className={`relative z-10 h-4.5 w-4.5 ${isActive ? iconAccent : "text-slate-500"}`}
+                      strokeWidth={2.2}
+                    />
                     <span className="relative z-10">{tab.label}</span>
                   </Link>
                 );
@@ -134,15 +152,15 @@ export default function Navbar({
             </nav>
 
             {/* Right Actions */}
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-end gap-2.5">
               <div className="hidden md:block">
                 <MonthSelector />
               </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="group flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.035] p-1 pr-2 text-slate-300 outline-none transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:ring-2 focus-visible:ring-white/20">
-                    <Avatar className="h-8 w-8 border border-white/15">
+                  <button className="group flex h-11 items-center gap-2 rounded-2xl border border-white/10 bg-[#080b0b]/80 p-1 pr-2 text-slate-300 outline-none transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-300/25">
+                    <Avatar className="h-9 w-9 border border-white/15 shadow-[0_0_22px_rgba(255,255,255,0.06)]">
                       <AvatarImage src={image ?? ""} />
                       <AvatarFallback className="bg-white text-xs font-semibold text-black">
                         {initials}
@@ -155,14 +173,14 @@ export default function Navbar({
 
                 <DropdownMenuContent
                   align="end"
-                  sideOffset={10}
-                  className="z-[60] w-60 rounded-2xl border border-white/10 bg-[#080808]/98 p-2 text-white shadow-2xl shadow-black/50 backdrop-blur-xl"
+                  sideOffset={12}
+                  className="z-[60] w-64 rounded-2xl border border-white/10 bg-[#070909]/98 p-2 text-white shadow-2xl shadow-black/60 backdrop-blur-2xl"
                 >
-                  <div className="px-3 py-2.5">
+                  <div className="px-3 py-3">
                     <p className="truncate text-sm font-semibold text-white">
                       {username ?? "User"}
                     </p>
-                    <p className="mt-0.5 truncate text-xs text-slate-500">
+                    <p className="mt-1 truncate text-xs text-slate-500">
                       {email}
                     </p>
                   </div>
@@ -170,25 +188,25 @@ export default function Navbar({
                   <DropdownMenuSeparator className="my-1 bg-white/10" />
 
                   <DropdownMenuItem
-                    className="cursor-pointer gap-2 rounded-xl px-3 py-2 text-sm text-slate-300 outline-none focus:bg-white/[0.07] focus:text-white"
+                    className="cursor-pointer gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-300 outline-none focus:bg-white/[0.07] focus:text-white"
                     onClick={() => router.push("/dashboard/profile")}
                   >
-                    <UserCircle className="h-4 w-4 text-slate-400" />
+                    <UserCircle className="h-4 w-4 text-emerald-300" />
                     Profile Settings
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
-                    className="cursor-pointer gap-2 rounded-xl px-3 py-2 text-sm text-slate-300 outline-none focus:bg-white/[0.07] focus:text-white"
+                    className="cursor-pointer gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-300 outline-none focus:bg-white/[0.07] focus:text-white"
                     onClick={() => router.push("/dashboard/credentials")}
                   >
-                    <Settings className="h-4 w-4 text-slate-400" />
+                    <Settings className="h-4 w-4 text-amber-300" />
                     Change Password
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator className="my-1 bg-white/10" />
 
                   <DropdownMenuItem
-                    className="cursor-pointer gap-2 rounded-xl px-3 py-2 text-sm text-red-300 outline-none focus:bg-red-500/10 focus:text-red-200"
+                    className="cursor-pointer gap-2 rounded-xl px-3 py-2.5 text-sm text-red-300 outline-none focus:bg-red-500/10 focus:text-red-200"
                     onClick={handleLogout}
                     disabled={loggingOut}
                   >
@@ -199,7 +217,7 @@ export default function Navbar({
               </DropdownMenu>
 
               <button
-                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.035] text-slate-400 transition-colors hover:bg-white/[0.07] hover:text-white md:hidden"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-[#080b0b]/80 text-slate-400 transition-colors hover:bg-white/[0.07] hover:text-white md:hidden"
                 onClick={() => setMobileMenuOpen((v) => !v)}
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               >
@@ -221,12 +239,13 @@ export default function Navbar({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="fixed left-0 right-0 top-[65px] z-40 border-b border-white/10 bg-[#050505]/98 px-4 py-4 shadow-2xl shadow-black/30 backdrop-blur-xl md:hidden"
+            className="fixed left-0 right-0 top-[72px] z-40 border-b border-white/10 bg-[#030505]/98 px-4 py-4 shadow-2xl shadow-black/40 backdrop-blur-2xl md:hidden"
           >
-            <nav className="mx-auto flex max-w-md flex-col gap-1">
+            <nav className="mx-auto flex max-w-md flex-col gap-1.5">
               {NAV_TABS.map((tab) => {
                 const isActive = pathname === tab.href;
                 const Icon = tab.icon;
+                const iconAccent = iconAccentMap[tab.label] ?? "text-slate-300";
 
                 return (
                   <Link
@@ -240,13 +259,16 @@ export default function Navbar({
                     }`}
                   >
                     <span
-                      className={`flex h-9 w-9 items-center justify-center rounded-xl border ${
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl border ${
                         isActive
-                          ? "border-white/15 bg-white text-black"
-                          : "border-white/10 bg-white/[0.04] text-slate-300"
+                          ? "border-white/15 bg-white/[0.08]"
+                          : "border-white/10 bg-white/[0.04]"
                       }`}
                     >
-                      <Icon className="h-4 w-4" strokeWidth={2.2} />
+                      <Icon
+                        className={`h-4.5 w-4.5 ${isActive ? iconAccent : "text-slate-400"}`}
+                        strokeWidth={2.2}
+                      />
                     </span>
                     {tab.label}
                   </Link>

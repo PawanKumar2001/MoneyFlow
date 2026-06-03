@@ -133,14 +133,14 @@ export default function SetupPage() {
 
   if (!incomeType) {
     return (
-      <div className="relative z-10 flex min-h-[calc(100dvh-69px)] items-center justify-center px-4 py-8">
+      <div className="relative z-10 flex min-h-[calc(100dvh-73px)] items-center justify-center px-4 py-5 sm:py-6">
         <div className="w-full max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 text-center"
+            className="mb-6 text-center"
           >
-            <IconBadge className="mx-auto mb-4">
+            <IconBadge className="mx-auto mb-4 border-emerald-400/20 bg-emerald-400/10 text-emerald-300 shadow-[0_0_32px_rgba(52,211,153,0.14)]">
               <Wallet className="h-6 w-6" strokeWidth={2.2} />
             </IconBadge>
             <h1 className="text-2xl font-bold text-white md:text-3xl">
@@ -162,6 +162,7 @@ export default function SetupPage() {
                 "Savings percentage insights",
               ]}
               delay={0.1}
+              iconClassName="border-emerald-400/20 bg-emerald-400/10 text-emerald-300 shadow-[0_0_28px_rgba(52,211,153,0.12)]"
               onClick={() => setIncomeType("SALARIED")}
             />
 
@@ -175,6 +176,7 @@ export default function SetupPage() {
                 "Income and expense trends",
               ]}
               delay={0.2}
+              iconClassName="border-amber-400/20 bg-amber-400/10 text-amber-300 shadow-[0_0_28px_rgba(251,191,36,0.12)]"
               onClick={() => setIncomeType("FREELANCER")}
             />
           </div>
@@ -184,14 +186,20 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="relative z-10 flex min-h-[calc(100dvh-69px)] items-center justify-center px-4 py-8">
+    <div className="relative z-10 flex min-h-[calc(100dvh-73px)] items-center justify-center px-4 py-5 sm:py-6">
       <div className="w-full max-w-md sm:max-w-lg">
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-6 text-center"
         >
-          <IconBadge className="mx-auto mb-4">
+          <IconBadge
+            className={`mx-auto mb-4 ${
+              incomeType === "SALARIED"
+                ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-300 shadow-[0_0_32px_rgba(52,211,153,0.14)]"
+                : "border-amber-400/20 bg-amber-400/10 text-amber-300 shadow-[0_0_32px_rgba(251,191,36,0.12)]"
+            }`}
+          >
             {incomeType === "SALARIED" ? (
               <Briefcase className="h-6 w-6" strokeWidth={2.2} />
             ) : (
@@ -221,8 +229,8 @@ export default function SetupPage() {
 
         <StepIndicator steps={steps} currentStep={step} />
 
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/30">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_34%)]" />
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/30">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,0.09),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(251,191,36,0.075),transparent_34%)]" />
           <div className="relative p-5 sm:p-6">
             <form onSubmit={handleSubmit(onSubmit)}>
               {completed ? (
@@ -569,7 +577,7 @@ function IconBadge({
 }) {
   return (
     <div
-      className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white shadow-lg shadow-black/20 ${className}`}
+      className={`flex h-12 w-12 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.06] text-white shadow-lg shadow-black/20 ${className}`}
     >
       {children}
     </div>
@@ -582,6 +590,7 @@ function IncomeTypeCard({
   description,
   items,
   delay,
+  iconClassName,
   onClick,
 }: {
   icon: React.ReactNode;
@@ -589,6 +598,7 @@ function IncomeTypeCard({
   description: string;
   items: string[];
   delay: number;
+  iconClassName: string;
   onClick: () => void;
 }) {
   return (
@@ -597,16 +607,17 @@ function IncomeTypeCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
       onClick={onClick}
-      className="group rounded-2xl border border-white/10 bg-[#080808]/95 p-5 text-left shadow-xl shadow-black/20 transition-all duration-300 hover:border-white/25 hover:bg-[#0d0d0d] sm:p-6"
+      className="group relative overflow-hidden rounded-3xl border border-white/10 bg-[#080808]/95 p-5 text-left shadow-2xl shadow-black/25 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-[#0d0d0d] sm:p-6"
     >
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-white shadow-lg shadow-black/20">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.06),transparent_35%)] opacity-80" />
+      <div className={`relative mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border ${iconClassName}`}>
         {icon}
       </div>
-      <h2 className="text-base font-semibold text-white sm:text-lg">{title}</h2>
-      <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
+      <h2 className="relative text-base font-semibold text-white sm:text-lg">{title}</h2>
+      <p className="relative mt-1.5 text-sm leading-relaxed text-slate-400">
         {description}
       </p>
-      <ul className="mt-4 space-y-2">
+      <ul className="relative mt-4 space-y-2">
         {items.map((item) => (
           <li key={item} className="flex items-center gap-2 text-xs text-slate-400">
             <span className="flex h-4 w-4 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-white">
@@ -679,7 +690,7 @@ function InfoBox({
 }) {
   return (
     <div className="flex gap-3 rounded-xl border border-white/10 bg-[#0b0b0b]/95 p-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-white">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10 text-amber-300">
         {icon}
       </div>
       <div>
@@ -713,7 +724,7 @@ function CompletionScreen() {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-        className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-black shadow-lg shadow-white/10"
+        className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300 shadow-[0_0_32px_rgba(52,211,153,0.14)]"
       >
         <Check className="h-7 w-7" strokeWidth={2.4} />
       </motion.div>

@@ -1,35 +1,15 @@
 @import "tailwindcss";
 
-@layer utilities {
-  .animate-blob {
-    animation: blob 10s infinite;
-  }
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-  .animate-float {
-    animation: float linear infinite;
-  }
-}
-
-@keyframes blob {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -30px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-}
-
-@keyframes float {
-  0% { transform: translateY(0px) translateX(0px); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
-}
-
 @layer base {
-select {
+  html {
+    background: #000;
+  }
+
+  body {
+    background: #000;
+  }
+
+  select {
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
     appearance: none !important;
@@ -49,22 +29,7 @@ select {
     border: none !important;
     outline: none !important;
   }
-}
 
-@layer utilities {
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
-  }
-  .scrollbar-thumb-white\/10::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 999px;
-  }
-  .scrollbar-track-transparent::-webkit-scrollbar-track {
-    background: transparent;
-  }
-}
-
-@layer base {
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     opacity: 0.7;
@@ -74,9 +39,8 @@ select {
   input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
   }
-}
 
-input[type="date"]::-webkit-inner-spin-button,
+  input[type="date"]::-webkit-inner-spin-button,
   input[type="date"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     display: none;
@@ -85,3 +49,179 @@ input[type="date"]::-webkit-inner-spin-button,
   input[type="date"]::-webkit-date-and-time-value {
     text-align: left;
   }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-thumb-white\/10::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+  }
+
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .animate-blob {
+    animation: blob 10s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  .animate-float {
+    animation: float linear infinite;
+  }
+
+  .moneyflow-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.075), transparent 30%),
+      linear-gradient(180deg, #030303 0%, #000 72%, #000 100%);
+  }
+
+  .moneyflow-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.13;
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(circle at 50% 35%, black 0%, transparent 72%);
+  }
+
+  .moneyflow-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 50% 42%, transparent 0%, rgba(0, 0, 0, 0.28) 42%, rgba(0, 0, 0, 0.86) 100%),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.72), transparent 24%, transparent 76%, rgba(0, 0, 0, 0.72));
+  }
+
+  .mf-glow {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(72px);
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .mf-glow-green {
+    left: -18rem;
+    top: 9rem;
+    height: 40rem;
+    width: 40rem;
+    background: rgba(16, 185, 129, 0.18);
+    animation: moneyflow-green-glow 14s ease-in-out infinite;
+  }
+
+  .mf-glow-yellow {
+    right: -16rem;
+    bottom: -14rem;
+    height: 42rem;
+    width: 42rem;
+    background: rgba(245, 158, 11, 0.16);
+    animation: moneyflow-yellow-glow 16s ease-in-out infinite;
+  }
+
+  .mf-glow-white {
+    left: 50%;
+    top: -18rem;
+    height: 34rem;
+    width: 34rem;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.06);
+    animation: moneyflow-white-glow 18s ease-in-out infinite;
+  }
+
+  .mf-orbit-line {
+    position: absolute;
+    left: -12rem;
+    bottom: -18rem;
+    height: 52rem;
+    width: 52rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(16, 185, 129, 0.08);
+    box-shadow: 0 0 80px rgba(16, 185, 129, 0.035);
+    animation: moneyflow-orbit 24s linear infinite;
+  }
+
+  .mf-orbit-line-secondary {
+    right: -16rem;
+    bottom: -20rem;
+    left: auto;
+    border-color: rgba(245, 158, 11, 0.08);
+    box-shadow: 0 0 80px rgba(245, 158, 11, 0.035);
+    animation-duration: 32s;
+    animation-direction: reverse;
+  }
+}
+
+@keyframes moneyflow-green-glow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.72;
+  }
+  50% {
+    transform: translate3d(5rem, -2rem, 0) scale(1.08);
+    opacity: 0.95;
+  }
+}
+
+@keyframes moneyflow-yellow-glow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.68;
+  }
+  50% {
+    transform: translate3d(-4rem, -3rem, 0) scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes moneyflow-white-glow {
+  0%, 100% {
+    transform: translate3d(-50%, 0, 0) scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(-50%, 2rem, 0) scale(1.08);
+    opacity: 0.62;
+  }
+}
+
+@keyframes moneyflow-orbit {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  to {
+    transform: rotate(360deg) scale(1.04);
+  }
+}
+
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+}

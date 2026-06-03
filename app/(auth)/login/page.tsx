@@ -94,203 +94,218 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative z-10 flex min-h-[calc(100dvh-120px)] items-center justify-center px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="w-full max-w-md"
-      >
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/50">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_34%)]" />
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="w-full"
+    >
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/50">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.08),transparent_32%)]" />
 
-          <div className="relative px-5 pb-6 pt-6 sm:px-7 sm:pb-7 sm:pt-7">
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white text-black shadow-lg shadow-white/10">
-                {step === "form" ? (
-                  <ShieldCheck className="h-6 w-6" strokeWidth={2.3} />
-                ) : (
-                  <Mail className="h-6 w-6" strokeWidth={2.3} />
-                )}
-              </div>
-
-              <AnimatePresence mode="wait">
-                {step === "form" ? (
-                  <motion.div
-                    key="form-header"
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                  >
-                    <h1 className="text-xl font-bold text-white sm:text-2xl">
-                      Welcome back
-                    </h1>
-                    <p className="mt-1 text-sm text-slate-400">
-                      Sign in to continue tracking your money.
-                    </p>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="otp-header"
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                  >
-                    <h1 className="text-xl font-bold text-white sm:text-2xl">
-                      Check your email
-                    </h1>
-                    <p className="mx-auto mt-1 max-w-xs text-sm leading-relaxed text-slate-400">
-                      We sent a 6-digit code to{" "}
-                      <span className="font-medium text-white">{email}</span>
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
+        <div className="relative px-5 pb-5 pt-5 sm:px-7 sm:pb-6 sm:pt-6">
+          <div className="mb-5 text-center">
             <AnimatePresence mode="wait">
-              {step === "form" && (
+              {step === "form" ? (
                 <motion.div
-                  key="form"
-                  initial={{ opacity: 0, x: 18 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -18 }}
-                  transition={{ duration: 0.25 }}
+                  key="form-icon"
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300 shadow-[0_0_28px_rgba(52,211,153,0.14)] sm:h-12 sm:w-12"
                 >
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="mb-5 h-10 w-full rounded-xl"
-                    onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-                  >
-                    <GoogleIcon />
-                    Continue with Google
-                  </Button>
-
-                  <div className="relative mb-5">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-white/10" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-[#080808] px-2 text-slate-500">or</span>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-slate-300">Email</Label>
-                      <Input
-                        type="email"
-                        placeholder="you@example.com"
-                        className="h-10 border-white/10 bg-white/[0.04] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
-                        {...register("email", {
-                          required: "Email is required",
-                        })}
-                      />
-                      {errors.email && (
-                        <p className="text-xs text-red-400">
-                          {errors.email.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between gap-3">
-                        <Label className="text-xs text-slate-300">Password</Label>
-                        <Link
-                          href="/forgot-password"
-                          className="text-xs text-slate-500 transition-colors hover:text-white"
-                        >
-                          Forgot password?
-                        </Link>
-                      </div>
-
-                      <PasswordInput
-                        placeholder="••••••••"
-                        className="h-10 border-white/10 bg-white/[0.04] pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
-                        {...register("password", {
-                          required: "Password is required",
-                        })}
-                      />
-
-                      {errors.password && (
-                        <p className="text-xs text-red-400">
-                          {errors.password.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {error && <ErrorMessage message={error} />}
-
-                    <Button
-                      type="submit"
-                      disabled={loading}
-                      className="h-10 w-full rounded-xl"
-                    >
-                      {loading ? "Sending code..." : "Sign In"}
-                    </Button>
-                  </form>
-
-                  <p className="mt-6 text-center text-sm text-slate-400">
-                    Don&apos;t have an account?{" "}
-                    <Link
-                      href="/signup"
-                      className="font-medium text-white transition-colors hover:text-slate-300"
-                    >
-                      Sign up
-                    </Link>
-                  </p>
+                  <ShieldCheck className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2.3} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="otp-icon"
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10 text-amber-300 shadow-[0_0_28px_rgba(251,191,36,0.14)] sm:h-12 sm:w-12"
+                >
+                  <Mail className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2.3} />
                 </motion.div>
               )}
+            </AnimatePresence>
 
-              {step === "otp" && (
+            <AnimatePresence mode="wait">
+              {step === "form" ? (
                 <motion.div
-                  key="otp"
-                  initial={{ opacity: 0, x: 18 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -18 }}
-                  transition={{ duration: 0.25 }}
-                  className="space-y-5"
+                  key="form-header"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
                 >
-                  <OTPInput onComplete={handleOTPComplete} disabled={otpLoading} />
-
-                  {error && <ErrorMessage message={error} />}
-
-                  {otpLoading && (
-                    <p className="text-center text-sm text-slate-400">
-                      Verifying...
-                    </p>
-                  )}
-
-                  <div className="flex flex-col items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={handleResend}
-                      disabled={resendLoading}
-                      className="text-sm text-slate-400 transition-colors hover:text-white disabled:opacity-50"
-                    >
-                      {resendLoading ? "Sending..." : "Resend code"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setStep("form");
-                        setError(null);
-                      }}
-                      className="inline-flex items-center gap-1.5 text-xs text-slate-500 transition-colors hover:text-slate-300"
-                    >
-                      <ArrowLeft className="h-3.5 w-3.5" />
-                      Back to login
-                    </button>
-                  </div>
+                  <h1 className="text-xl font-bold text-white sm:text-2xl">
+                    Welcome back
+                  </h1>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Sign in to continue tracking your money.
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="otp-header"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                >
+                  <h1 className="text-xl font-bold text-white sm:text-2xl">
+                    Check your email
+                  </h1>
+                  <p className="mx-auto mt-1 max-w-xs text-sm leading-relaxed text-slate-400">
+                    We sent a 6-digit code to{" "}
+                    <span className="font-medium text-white">{email}</span>
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
+
+          <AnimatePresence mode="wait">
+            {step === "form" && (
+              <motion.div
+                key="form"
+                initial={{ opacity: 0, x: 18 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -18 }}
+                transition={{ duration: 0.25 }}
+              >
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="mb-4 h-10 w-full rounded-xl"
+                  onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                >
+                  <GoogleIcon />
+                  Continue with Google
+                </Button>
+
+                <div className="relative mb-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-white/10" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-[#080808] px-2 text-slate-500">or</span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-slate-300">Email</Label>
+                    <Input
+                      type="email"
+                      placeholder="you@example.com"
+                      className="h-10 border-white/10 bg-white/[0.04] text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                      {...register("email", {
+                        required: "Email is required",
+                      })}
+                    />
+                    {errors.email && (
+                      <p className="text-xs text-red-400">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <Label className="text-xs text-slate-300">Password</Label>
+                      <Link
+                        href="/forgot-password"
+                        className="text-xs text-slate-500 transition-colors hover:text-white"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+
+                    <PasswordInput
+                      placeholder="••••••••"
+                      className="h-10 border-white/10 bg-white/[0.04] pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
+                      {...register("password", {
+                        required: "Password is required",
+                      })}
+                    />
+
+                    {errors.password && (
+                      <p className="text-xs text-red-400">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {error && <ErrorMessage message={error} />}
+
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="h-10 w-full rounded-xl"
+                  >
+                    {loading ? "Sending code..." : "Sign In"}
+                  </Button>
+                </form>
+
+                <p className="mt-5 text-center text-sm text-slate-400">
+                  Don&apos;t have an account?{" "}
+                  <Link
+                    href="/signup"
+                    className="font-medium text-white transition-colors hover:text-slate-300"
+                  >
+                    Sign up
+                  </Link>
+                </p>
+              </motion.div>
+            )}
+
+            {step === "otp" && (
+              <motion.div
+                key="otp"
+                initial={{ opacity: 0, x: 18 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -18 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-4"
+              >
+                <OTPInput onComplete={handleOTPComplete} disabled={otpLoading} />
+
+                {error && <ErrorMessage message={error} />}
+
+                {otpLoading && (
+                  <p className="text-center text-sm text-slate-400">
+                    Verifying...
+                  </p>
+                )}
+
+                <div className="flex flex-col items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendLoading}
+                    className="text-sm text-slate-400 transition-colors hover:text-white disabled:opacity-50"
+                  >
+                    {resendLoading ? "Sending..." : "Resend code"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep("form");
+                      setError(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs text-slate-500 transition-colors hover:text-slate-300"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Back to login
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </motion.div>
-    </main>
+      </div>
+    </motion.div>
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ElementType } from "react";
 import { motion } from "framer-motion";
 import {
   Bar,
@@ -24,6 +24,7 @@ import {
   PieChart as PieChartIcon,
   ReceiptText,
   RefreshCcw,
+  Sparkles,
   TrendingUp,
   WalletCards,
 } from "lucide-react";
@@ -35,7 +36,6 @@ import { getCurrencySymbol, formatAmount } from "@/lib/currency";
 import { generateExpenseCSV, downloadCSV } from "@/lib/csv";
 import ChartSkeleton from "@/components/shared/ChartSkelton";
 import { Button } from "@/components/ui/button";
-
 
 type SummaryData = {
   expenses: {
@@ -63,14 +63,14 @@ type TrendData = {
 }[];
 
 const PIE_COLORS = [
-  "#ffffff",
-  "#cbd5e1",
-  "#94a3b8",
-  "#64748b",
-  "#a3a3a3",
-  "#737373",
-  "#d4d4d4",
-  "#525252",
+  "#22c55e",
+  "#f59e0b",
+  "#38bdf8",
+  "#fb7185",
+  "#a78bfa",
+  "#14b8a6",
+  "#f97316",
+  "#84cc16",
 ];
 
 const TABS = ["Chart View", "Table View"];
@@ -191,13 +191,13 @@ export default function SummaryPage() {
     {
       name: isFreelancer ? "Earnings" : "Income",
       value: data?.totalIncome ?? 0,
-      fill: "#ffffff",
+      fill: "#22c55e",
     },
-    { name: "Expenses", value: data?.totalExpenses ?? 0, fill: "#94a3b8" },
+    { name: "Expenses", value: data?.totalExpenses ?? 0, fill: "#fb7185" },
     {
       name: "Remaining",
       value: Math.max(data?.remaining ?? 0, 0),
-      fill: "#64748b",
+      fill: "#38bdf8",
     },
   ];
 
@@ -212,16 +212,16 @@ export default function SummaryPage() {
 
   if (error) {
     return (
-      <div className="px-4 pt-6 pb-8 md:px-8 lg:px-12">
-        <div className="mx-auto flex min-h-[420px] max-w-xl flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#080808]/95 p-6 text-center shadow-2xl shadow-black/30">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
-            <AlertTriangle className="h-6 w-6 text-white" strokeWidth={2.2} />
+      <div className="mx-auto w-full max-w-6xl px-4 pb-8 pt-6 md:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[420px] max-w-xl flex-col items-center justify-center rounded-[1.65rem] border border-white/10 bg-[#080808]/95 p-6 text-center shadow-2xl shadow-black/30">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 shadow-lg shadow-red-500/10">
+            <AlertTriangle className="h-7 w-7 text-red-300" strokeWidth={2.2} />
           </div>
-          <h3 className="text-base font-semibold text-white">Could not load summary</h3>
+          <h3 className="text-lg font-semibold text-white">Could not load summary</h3>
           <p className="mt-1 max-w-sm text-sm leading-relaxed text-slate-400">
             Something went wrong while loading your monthly summary.
           </p>
-          <Button onClick={() => setRetryKey((key) => key + 1)} className="mt-5">
+          <Button onClick={() => setRetryKey((key) => key + 1)} className="mt-5 gap-2">
             <RefreshCcw className="h-4 w-4" />
             Try again
           </Button>
@@ -232,16 +232,16 @@ export default function SummaryPage() {
 
   if (!hasExpenses && !hasIncome) {
     return (
-      <div className="px-4 pt-6 pb-8 md:px-8 lg:px-12">
-        <div className="mx-auto flex min-h-[420px] max-w-xl flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#080808]/95 p-6 text-center shadow-2xl shadow-black/30">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-8 pt-6 md:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[420px] max-w-xl flex-col items-center justify-center rounded-[1.65rem] border border-white/10 bg-[#080808]/95 p-6 text-center shadow-2xl shadow-black/30">
           <motion.div
             animate={{ y: [0, -6, 0] }}
             transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-            className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]"
+            className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 shadow-lg shadow-emerald-500/10"
           >
-            <BarChart3 className="h-7 w-7 text-white" strokeWidth={2.2} />
+            <BarChart3 className="h-8 w-8 text-emerald-300" strokeWidth={2.2} />
           </motion.div>
-          <h3 className="text-base font-semibold text-white">No data for this month</h3>
+          <h3 className="text-lg font-semibold text-white">No data for this month</h3>
           <p className="mt-1 max-w-sm text-sm leading-relaxed text-slate-400">
             Add some expenses or {isFreelancer ? "log your income" : "check your income setup"} to see your monthly summary here.
           </p>
@@ -252,52 +252,63 @@ export default function SummaryPage() {
   }
 
   return (
-    <div className="px-4 pt-6 pb-8 md:px-8 lg:px-12 space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 pb-8 pt-6 md:px-6 lg:px-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">Monthly Summary</h2>
-          <p className="text-xs text-slate-500">Overview of your finances for this month</p>
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Dashboard
+          </p>
+          <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+            Monthly Summary
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Overview of your finances for this month
+          </p>
         </div>
 
         {hasExpenses && (
-          <Button onClick={handleExport} variant="secondary" className="w-full gap-2 sm:w-auto">
-            <Download className="h-4 w-4" />
+          <Button onClick={handleExport} variant="secondary" className="h-12 w-full gap-2 rounded-2xl px-5 sm:w-auto">
+            <Download className="h-4 w-4 text-sky-300" />
             Export CSV
           </Button>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <SummaryStatCard
           icon={WalletCards}
+          tone="green"
           label={isFreelancer ? "Earnings" : "Income"}
           value={`${symbol}${formatAmount(data!.totalIncome)}`}
         />
         <SummaryStatCard
           icon={ReceiptText}
+          tone="rose"
           label="Expenses"
           value={`${symbol}${formatAmount(data!.totalExpenses)}`}
         />
         <SummaryStatCard
           icon={TrendingUp}
+          tone="sky"
           label="Remaining"
           value={`${symbol}${formatAmount(Math.max(data!.remaining, 0))}`}
         />
         <SummaryStatCard
           icon={BarChart3}
+          tone="amber"
           label="Savings"
           value={`${data!.savingsPercent}%`}
         />
       </div>
 
-      <div className="flex w-full rounded-2xl border border-white/10 bg-[#080808]/95 p-1 shadow-xl shadow-black/20 sm:w-fit">
+      <div className="flex w-full rounded-2xl border border-white/10 bg-[#080808]/95 p-1.5 shadow-xl shadow-black/20 sm:w-fit">
         {TABS.map((tab, index) => (
           <button
             key={tab}
             onClick={() => setActiveTab(index)}
-            className={`flex-1 rounded-xl px-4 py-2 text-xs font-semibold transition-all sm:flex-none ${
+            className={`relative flex-1 rounded-xl px-5 py-2.5 text-xs font-semibold transition-all sm:flex-none ${
               activeTab === index
-                ? "bg-white text-black"
+                ? "bg-white text-black shadow-lg shadow-white/10"
                 : "text-slate-400 hover:bg-white/[0.04] hover:text-white"
             }`}
           >
@@ -307,13 +318,14 @@ export default function SummaryPage() {
       </div>
 
       {activeTab === 0 && (
-        <div className="space-y-5">
+        <div className="space-y-6">
           <ChartCard
             title={isFreelancer ? "Earnings vs Expenses" : "Income vs Expenses"}
             icon={BarChart3}
+            tone="green"
           >
-            <ResponsiveContainer width="100%" height={230}>
-              <BarChart data={barData} barSize={44}>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={barData} barSize={54}>
                 <XAxis
                   dataKey="name"
                   tick={{ fill: "#94a3b8", fontSize: 12 }}
@@ -326,8 +338,8 @@ export default function SummaryPage() {
                   tickLine={false}
                   tickFormatter={(value) => `${symbol}${(value / 1000).toFixed(0)}k`}
                 />
-                <Tooltip content={<MoneyTooltip symbol={symbol} />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-                <Bar dataKey="value" radius={[8, 8, 0, 0]} cursor="default">
+                <Tooltip content={<MoneyTooltip symbol={symbol} />} cursor={{ fill: "rgba(34,197,94,0.055)" }} />
+                <Bar dataKey="value" radius={[10, 10, 0, 0]} cursor="default">
                   {barData.map((entry, index) => (
                     <Cell key={index} fill={entry.fill} />
                   ))}
@@ -340,8 +352,9 @@ export default function SummaryPage() {
             <ChartCard
               title={isFreelancer ? "6-Month Income & Expense Trend" : "6-Month Spending Trend"}
               icon={TrendingUp}
+              tone="sky"
             >
-              <ResponsiveContainer width="100%" height={230}>
+              <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={trend}>
                   <XAxis
                     dataKey="name"
@@ -355,25 +368,25 @@ export default function SummaryPage() {
                     tickLine={false}
                     tickFormatter={(value) => `${symbol}${(value / 1000).toFixed(0)}k`}
                   />
-                  <Tooltip content={<MoneyTooltip symbol={symbol} />} cursor={{ stroke: "rgba(255,255,255,0.12)", strokeWidth: 1 }} />
+                  <Tooltip content={<MoneyTooltip symbol={symbol} />} cursor={{ stroke: "rgba(56,189,248,0.22)", strokeWidth: 1 }} />
                   {isFreelancer && (
                     <Line
                       type="monotone"
                       dataKey="income"
-                      stroke="#ffffff"
-                      strokeWidth={2}
-                      dot={{ fill: "#ffffff", r: 3 }}
-                      activeDot={{ r: 5 }}
+                      stroke="#22c55e"
+                      strokeWidth={3}
+                      dot={{ fill: "#22c55e", r: 4, strokeWidth: 0 }}
+                      activeDot={{ r: 6, stroke: "#052e16", strokeWidth: 2 }}
                       name="Earnings"
                     />
                   )}
                   <Line
                     type="monotone"
                     dataKey="expenses"
-                    stroke="#94a3b8"
-                    strokeWidth={2}
-                    dot={{ fill: "#94a3b8", r: 3 }}
-                    activeDot={{ r: 5 }}
+                    stroke="#fb7185"
+                    strokeWidth={3}
+                    dot={{ fill: "#fb7185", r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, stroke: "#4c0519", strokeWidth: 2 }}
                     name="Expenses"
                   />
                 </LineChart>
@@ -382,9 +395,9 @@ export default function SummaryPage() {
           )}
 
           {data!.byCategory.length > 0 ? (
-            <ChartCard title="Spending by Category" icon={PieChartIcon}>
-              <div className="grid gap-4 lg:grid-cols-[minmax(260px,0.9fr)_1.1fr] lg:items-center">
-                <div className="h-[220px] sm:h-[260px]">
+            <ChartCard title="Spending by Category" icon={PieChartIcon} tone="amber">
+              <div className="grid gap-5 lg:grid-cols-[minmax(280px,0.9fr)_1.1fr] lg:items-center">
+                <div className="h-[240px] sm:h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -392,7 +405,7 @@ export default function SummaryPage() {
                         cx="50%"
                         cy="50%"
                         innerRadius="48%"
-                        outerRadius="76%"
+                        outerRadius="78%"
                         paddingAngle={3}
                         dataKey="value"
                         isAnimationActive={false}
@@ -415,16 +428,16 @@ export default function SummaryPage() {
                   {data!.byCategory.map((item, index) => (
                     <div
                       key={item.name}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/40 px-3 py-2"
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/45 px-3.5 py-3"
                     >
-                      <div className="flex min-w-0 items-center gap-2">
+                      <div className="flex min-w-0 items-center gap-2.5">
                         <span
-                          className="h-2.5 w-2.5 shrink-0 rounded-full"
-                          style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
+                          className="h-3 w-3 shrink-0 rounded-full shadow-[0_0_16px_currentColor]"
+                          style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length], color: PIE_COLORS[index % PIE_COLORS.length] }}
                         />
-                        <span className="truncate text-xs font-medium text-slate-300">{item.name}</span>
+                        <span className="truncate text-sm font-medium text-slate-300">{item.name}</span>
                       </div>
-                      <span className="shrink-0 text-xs font-semibold text-white">
+                      <span className="shrink-0 text-sm font-bold text-white">
                         {symbol}{formatAmount(item.value)}
                       </span>
                     </div>
@@ -435,31 +448,37 @@ export default function SummaryPage() {
           ) : (
             <EmptyPanel
               icon={PieChartIcon}
+              tone="amber"
               title="No expenses to categorize yet"
               description="Add expenses to see your spending grouped by category."
             />
           )}
 
           {insights.length > 0 && (
-            <div className="rounded-2xl border border-white/10 bg-[#080808]/95 p-4 shadow-2xl shadow-black/20">
-              <div className="mb-4 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
-                  <Lightbulb className="h-4 w-4 text-white" strokeWidth={2.2} />
+            <div className="relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-[#080808]/95 p-5 shadow-2xl shadow-black/20">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.08),transparent_34%)]" />
+              <div className="relative mb-4 flex items-center gap-3">
+                <IconBadge icon={Lightbulb} tone="amber" />
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Insights</p>
+                  <h3 className="text-base font-semibold text-white">Financial Insights</h3>
                 </div>
-                <h3 className="text-sm font-semibold text-white">Financial Insights</h3>
               </div>
 
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="relative grid gap-3 md:grid-cols-2">
                 {insights.map((insight, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.08 }}
-                    className="rounded-xl border border-white/10 bg-black/40 p-4"
+                    className="rounded-2xl border border-white/10 bg-black/45 p-4"
                   >
-                    <p className="text-sm font-medium text-white">{insight.title}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-400">{insight.description}</p>
+                    <div className="mb-2 flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-amber-300" strokeWidth={2.2} />
+                      <p className="text-sm font-semibold text-white">{insight.title}</p>
+                    </div>
+                    <p className="text-xs leading-relaxed text-slate-400">{insight.description}</p>
                   </motion.div>
                 ))}
               </div>
@@ -469,34 +488,35 @@ export default function SummaryPage() {
       )}
 
       {activeTab === 1 && (
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/20">
+        <div className="overflow-hidden rounded-[1.65rem] border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/20">
           {!hasExpenses ? (
             <EmptyPanel
               icon={FileText}
+              tone="sky"
               title="No expenses recorded this month"
               description="Your expense table will appear here once you add records."
             />
           ) : (
             <>
-              <div className="flex flex-col gap-3 border-b border-white/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 border-b border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-white">Expense records</p>
+                  <p className="text-base font-semibold text-white">Expense records</p>
                   <p className="text-xs text-slate-500">
                     {data!.expenses.length} expense{data!.expenses.length !== 1 ? "s" : ""} this month
                   </p>
                 </div>
                 <Button onClick={handleExport} variant="ghost" size="sm" className="w-full gap-2 sm:w-auto">
-                  <Download className="h-3.5 w-3.5" />
+                  <Download className="h-3.5 w-3.5 text-sky-300" />
                   Export CSV
                 </Button>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[720px] text-sm">
-                  <thead className="bg-white/[0.03]">
+                  <thead className="bg-white/[0.035]">
                     <tr className="border-b border-white/10 text-left">
-                      {['Name', 'Category', 'Amount', 'Date', 'Type'].map((heading) => (
-                        <th key={heading} className="px-4 py-3 text-xs font-medium text-slate-500">
+                      {["Name", "Category", "Amount", "Date", "Type"].map((heading) => (
+                        <th key={heading} className="px-5 py-3.5 text-xs font-medium text-slate-500">
                           {heading}
                         </th>
                       ))}
@@ -505,19 +525,19 @@ export default function SummaryPage() {
                   <tbody>
                     {data!.expenses.map((expense) => (
                       <tr key={expense.id} className="border-b border-white/5 transition-colors hover:bg-white/[0.03]">
-                        <td className="px-4 py-3 font-medium text-white">{expense.name}</td>
-                        <td className="px-4 py-3 text-slate-400">{expense.category}</td>
-                        <td className="px-4 py-3 font-semibold text-white">
+                        <td className="px-5 py-4 font-medium text-white">{expense.name}</td>
+                        <td className="px-5 py-4 text-slate-400">{expense.category}</td>
+                        <td className="px-5 py-4 font-semibold text-white">
                           {symbol}{formatAmount(expense.amount)}
                         </td>
-                        <td className="px-4 py-3 text-slate-400">
+                        <td className="px-5 py-4 text-slate-400">
                           {new Date(expense.date).toLocaleDateString("en-US", {
                             day: "numeric",
                             month: "short",
                           })}
                         </td>
-                        <td className="px-4 py-3">
-                          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-xs font-medium text-slate-300">
+                        <td className="px-5 py-4">
+                          <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${expense.autoGenerated ? "border-amber-500/20 bg-amber-500/10 text-amber-300" : "border-white/10 bg-white/[0.04] text-slate-300"}`}>
                             {expense.autoGenerated ? "Auto" : "Manual"}
                           </span>
                         </td>
@@ -525,14 +545,14 @@ export default function SummaryPage() {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t border-white/10 bg-white/[0.03]">
-                      <td colSpan={2} className="px-4 py-3 text-xs font-medium text-slate-400">
+                    <tr className="border-t border-white/10 bg-white/[0.035]">
+                      <td colSpan={2} className="px-5 py-4 text-xs font-medium text-slate-400">
                         Total Expenses
                       </td>
-                      <td className="px-4 py-3 font-bold text-white">
+                      <td className="px-5 py-4 font-bold text-rose-300">
                         {symbol}{formatAmount(data!.totalExpenses)}
                       </td>
-                      <td colSpan={2} className="px-4 py-3 text-xs text-slate-500">
+                      <td colSpan={2} className="px-5 py-4 text-xs text-slate-500">
                         Remaining: {symbol}{formatAmount(Math.max(data!.remaining, 0))}
                       </td>
                     </tr>
@@ -547,28 +567,51 @@ export default function SummaryPage() {
   );
 }
 
+function toneClasses(tone: Tone) {
+  const tones = {
+    green: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 shadow-emerald-500/10",
+    rose: "border-rose-500/20 bg-rose-500/10 text-rose-300 shadow-rose-500/10",
+    sky: "border-sky-500/20 bg-sky-500/10 text-sky-300 shadow-sky-500/10",
+    amber: "border-amber-500/20 bg-amber-500/10 text-amber-300 shadow-amber-500/10",
+    violet: "border-violet-500/20 bg-violet-500/10 text-violet-300 shadow-violet-500/10",
+  };
+
+  return tones[tone];
+}
+
+type Tone = "green" | "rose" | "sky" | "amber" | "violet";
+
+function IconBadge({ icon: Icon, tone }: { icon: ElementType; tone: Tone }) {
+  return (
+    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border shadow-lg ${toneClasses(tone)}`}>
+      <Icon className="h-5 w-5" strokeWidth={2.2} />
+    </div>
+  );
+}
+
 function SummaryStatCard({
   icon: Icon,
   label,
   value,
+  tone,
 }: {
-  icon: typeof WalletCards;
+  icon: ElementType;
   label: string;
   value: string;
+  tone: Tone;
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-white/10 bg-[#080808]/95 p-3 shadow-xl shadow-black/20"
+      className="relative overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#080808]/95 p-4 shadow-xl shadow-black/20"
     >
-      <div className="mb-2 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
-          <Icon className="h-4 w-4 text-white" strokeWidth={2.2} />
-        </div>
-        <p className="truncate text-[11px] font-medium text-slate-500">{label}</p>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.055),transparent_38%)]" />
+      <div className="relative mb-3 flex items-center gap-2.5">
+        <IconBadge icon={Icon} tone={tone} />
+        <p className="truncate text-xs font-medium text-slate-500">{label}</p>
       </div>
-      <p className="truncate text-base font-bold text-white">{value}</p>
+      <p className="relative truncate text-xl font-bold text-white md:text-2xl">{value}</p>
     </motion.div>
   );
 }
@@ -576,21 +619,22 @@ function SummaryStatCard({
 function ChartCard({
   title,
   icon: Icon,
+  tone,
   children,
 }: {
   title: string;
-  icon: typeof BarChart3;
+  icon: ElementType;
+  tone: Tone;
   children: React.ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 p-4 shadow-2xl shadow-black/20">
-      <div className="mb-4 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
-          <Icon className="h-4 w-4 text-white" strokeWidth={2.2} />
-        </div>
-        <h3 className="text-sm font-semibold text-white">{title}</h3>
+    <div className="relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-[#080808]/95 p-5 shadow-2xl shadow-black/20">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.055),transparent_36%)]" />
+      <div className="relative mb-5 flex items-center gap-3">
+        <IconBadge icon={Icon} tone={tone} />
+        <h3 className="text-base font-semibold text-white">{title}</h3>
       </div>
-      {children}
+      <div className="relative">{children}</div>
     </div>
   );
 }
@@ -599,18 +643,20 @@ function EmptyPanel({
   icon: Icon,
   title,
   description,
+  tone,
 }: {
-  icon: typeof PieChartIcon;
+  icon: ElementType;
   title: string;
   description: string;
+  tone: Tone;
 }) {
   return (
-    <div className="flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#080808]/95 p-6 text-center">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
-        <Icon className="h-6 w-6 text-white" strokeWidth={2.2} />
+    <div className="flex min-h-[280px] flex-col items-center justify-center rounded-[1.65rem] border border-white/10 bg-[#080808]/95 p-6 text-center">
+      <div className="mb-4">
+        <IconBadge icon={Icon} tone={tone} />
       </div>
-      <h3 className="text-sm font-semibold text-white">{title}</h3>
-      <p className="mt-1 max-w-xs text-xs leading-relaxed text-slate-400">{description}</p>
+      <h3 className="text-base font-semibold text-white">{title}</h3>
+      <p className="mt-1 max-w-xs text-sm leading-relaxed text-slate-400">{description}</p>
     </div>
   );
 }
@@ -619,10 +665,10 @@ function MoneyTooltip({ active, payload, label, symbol }: any) {
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-black/95 px-3 py-2 text-xs shadow-xl shadow-black/40">
-      {label && <p className="mb-1 font-medium text-slate-300">{label}</p>}
+    <div className="rounded-2xl border border-white/10 bg-black/95 px-3.5 py-3 text-xs shadow-xl shadow-black/40 backdrop-blur-xl">
+      {label && <p className="mb-1.5 font-medium text-slate-300">{label}</p>}
       {payload.map((item: any, index: number) => (
-        <p key={index} className="text-white">
+        <p key={index} className="font-medium text-white">
           {item.name ? `${item.name}: ` : ""}
           {symbol}{Number(item.value).toLocaleString()}
         </p>
@@ -633,34 +679,34 @@ function MoneyTooltip({ active, payload, label, symbol }: any) {
 
 function SummarySkeleton() {
   return (
-    <div className="px-4 pt-6 pb-8 md:px-8 lg:px-12 space-y-5">
+    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 pb-8 pt-6 md:px-6 lg:px-8">
       <div className="space-y-2">
-        <div className="h-5 w-44 animate-pulse rounded-lg bg-white/10" />
-        <div className="h-3 w-60 animate-pulse rounded-lg bg-white/10" />
+        <div className="h-8 w-64 animate-pulse rounded-lg bg-white/10" />
+        <div className="h-4 w-72 animate-pulse rounded-lg bg-white/10" />
       </div>
 
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[...Array(4)].map((_, index) => (
-          <div key={index} className="rounded-2xl border border-white/10 bg-[#080808]/95 p-3">
+          <div key={index} className="rounded-[1.35rem] border border-white/10 bg-[#080808]/95 p-4">
             <div className="mb-3 flex items-center gap-2">
-              <div className="h-8 w-8 animate-pulse rounded-xl bg-white/10" />
+              <div className="h-10 w-10 animate-pulse rounded-2xl bg-white/10" />
               <div className="h-3 w-16 animate-pulse rounded-full bg-white/10" />
             </div>
-            <div className="h-5 w-24 animate-pulse rounded-full bg-white/10" />
+            <div className="h-7 w-28 animate-pulse rounded-full bg-white/10" />
           </div>
         ))}
       </div>
 
-      <div className="h-10 w-full animate-pulse rounded-2xl bg-white/10 sm:w-56" />
+      <div className="h-11 w-full animate-pulse rounded-2xl bg-white/10 sm:w-60" />
 
-      <div className="space-y-5">
-        <div className="rounded-2xl border border-white/10 bg-[#080808]/95 p-4 space-y-4">
-          <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
-          <ChartSkeleton height={230} />
+      <div className="space-y-6">
+        <div className="space-y-4 rounded-[1.65rem] border border-white/10 bg-[#080808]/95 p-5">
+          <div className="h-5 w-48 animate-pulse rounded bg-white/10" />
+          <ChartSkeleton height={280} />
         </div>
-        <div className="rounded-2xl border border-white/10 bg-[#080808]/95 p-4 space-y-4">
-          <div className="h-4 w-40 animate-pulse rounded bg-white/10" />
-          <ChartSkeleton height={260} />
+        <div className="space-y-4 rounded-[1.65rem] border border-white/10 bg-[#080808]/95 p-5">
+          <div className="h-5 w-48 animate-pulse rounded bg-white/10" />
+          <ChartSkeleton height={300} />
         </div>
       </div>
     </div>

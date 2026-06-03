@@ -45,21 +45,29 @@ const features = [
     icon: ReceiptText,
     title: "Fast expense tracking",
     description: "Add, search, and review expenses without opening the web dashboard.",
+    iconClass:
+      "border-emerald-400/20 bg-emerald-400/10 text-emerald-300 shadow-[0_0_32px_rgba(52,211,153,0.10)]",
   },
   {
     icon: WalletCards,
     title: "Income overview",
     description: "Track earned, spent, remaining, and saved amounts in a compact layout.",
+    iconClass:
+      "border-sky-400/20 bg-sky-400/10 text-sky-300 shadow-[0_0_32px_rgba(56,189,248,0.10)]",
   },
   {
     icon: Repeat2,
     title: "Subscription manager",
     description: "Manage recurring payments and know what renews every month.",
+    iconClass:
+      "border-amber-400/20 bg-amber-400/10 text-amber-300 shadow-[0_0_32px_rgba(251,191,36,0.10)]",
   },
   {
     icon: BarChart3,
     title: "Monthly insights",
     description: "Review charts, category breakdowns, and savings percentage.",
+    iconClass:
+      "border-violet-400/20 bg-violet-400/10 text-violet-300 shadow-[0_0_32px_rgba(167,139,250,0.10)]",
   },
 ];
 
@@ -87,16 +95,19 @@ const trustNotes = [
     icon: BadgeCheck,
     title: "Official MoneyFlow build",
     text: "The APK download is linked from the official MoneyFlow web page.",
+    iconClass: "text-emerald-300",
   },
   {
     icon: LockKeyhole,
     title: "Same account experience",
     text: "Use MoneyFlow across web and mobile with the same product flow.",
+    iconClass: "text-sky-300",
   },
   {
     icon: Smartphone,
     title: "Android focused",
     text: "Built as a lightweight companion app for quick daily tracking.",
+    iconClass: "text-amber-300",
   },
 ];
 
@@ -107,20 +118,23 @@ export const metadata = {
 
 export default function MobileAppPage() {
   return (
-    <main className="relative z-10 min-h-[calc(100dvh-112px)] px-4 py-6 text-white sm:px-6 lg:px-8">
+    <main className="relative z-10 min-h-[calc(100dvh-73px)] px-4 py-6 text-white sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-6xl">
         <Link
           href="/"
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#080808]/95 px-3 py-2 text-xs font-medium text-slate-400 transition hover:border-white/20 hover:text-white"
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#080808]/95 px-3 py-2 text-xs font-medium text-slate-400 shadow-xl shadow-black/20 transition hover:border-white/20 hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to MoneyFlow
         </Link>
 
         {/* Hero */}
-        <section className="grid items-center gap-8 rounded-[2rem] border border-white/10 bg-[#070707]/95 p-5 shadow-2xl shadow-black/30 sm:p-7 lg:grid-cols-[1fr_0.82fr] lg:gap-10 lg:p-9">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300">
+        <section className="relative grid items-center gap-8 overflow-hidden rounded-[2rem] border border-white/10 bg-[#070707]/95 p-5 shadow-2xl shadow-black/30 sm:p-7 lg:grid-cols-[1fr_0.82fr] lg:gap-10 lg:p-9">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,0.13),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(251,191,36,0.10),transparent_34%)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/30 to-transparent" />
+
+          <div className="relative">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1.5 text-xs font-medium text-sky-300 shadow-[0_0_28px_rgba(56,189,248,0.10)]">
               <Smartphone className="h-3.5 w-3.5" />
               Android app available
             </div>
@@ -139,7 +153,7 @@ export default function MobileAppPage() {
                 href={APK_DOWNLOAD_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-black transition hover:bg-slate-200"
               >
                 <Download className="h-4 w-4" />
                 Download APK
@@ -147,16 +161,16 @@ export default function MobileAppPage() {
 
               <Link
                 href="/signup"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
               >
                 Open Web App
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
-            <div className="mt-5 flex max-w-2xl items-start gap-3 rounded-2xl border border-white/10 bg-black/40 p-4 text-left">
-              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-slate-300" />
-              <p className="text-xs leading-relaxed text-slate-400 sm:text-sm">
+            <div className="mt-5 flex max-w-2xl items-start gap-3 rounded-2xl border border-amber-400/15 bg-amber-400/10 p-4 text-left">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+              <p className="text-xs leading-relaxed text-slate-300 sm:text-sm">
                 Android may show a security warning because this APK is installed outside
                 the Play Store. Only download it from this official MoneyFlow page.
               </p>
@@ -164,7 +178,8 @@ export default function MobileAppPage() {
           </div>
 
           {/* Hero phone preview */}
-          <div className="mx-auto w-full max-w-[330px] lg:max-w-[380px]">
+          <div className="relative mx-auto w-full max-w-[330px] lg:max-w-[380px]">
+            <div className="pointer-events-none absolute -inset-6 rounded-[3rem] bg-gradient-to-br from-emerald-400/10 via-transparent to-amber-400/10 blur-2xl" />
             <div className="relative rounded-[2.4rem] border border-white/10 bg-[#0c0c0c] p-3 shadow-2xl shadow-black/50">
               <div className="pointer-events-none absolute inset-x-12 top-2 z-10 h-5 rounded-b-2xl bg-black" />
               <div className="overflow-hidden rounded-[1.9rem] border border-white/10 bg-black">
@@ -182,7 +197,7 @@ export default function MobileAppPage() {
         <section className="mt-12 sm:mt-16">
           <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-amber-300/80">
                 App Screens
               </p>
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
@@ -199,7 +214,7 @@ export default function MobileAppPage() {
             {screenshots.map((screen) => (
               <article
                 key={screen.title}
-                className="group rounded-3xl border border-white/10 bg-[#080808]/95 p-3 shadow-xl shadow-black/20 transition hover:border-white/20"
+                className="group rounded-3xl border border-white/10 bg-[#080808]/95 p-3 shadow-xl shadow-black/20 transition hover:border-white/20 hover:bg-[#0d0d0d]"
               >
                 <div className="overflow-hidden rounded-[1.65rem] border border-white/10 bg-black">
                   <img
@@ -222,7 +237,7 @@ export default function MobileAppPage() {
         {/* Features */}
         <section className="mt-12 sm:mt-16">
           <div className="mb-6 text-center">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-emerald-300/80">
               Features
             </p>
             <h2 className="text-2xl font-bold text-white sm:text-3xl">
@@ -237,10 +252,10 @@ export default function MobileAppPage() {
               return (
                 <div
                   key={feature.title}
-                  className="rounded-2xl border border-white/10 bg-[#080808]/95 p-5 shadow-xl shadow-black/20"
+                  className="rounded-2xl border border-white/10 bg-[#080808]/95 p-5 shadow-xl shadow-black/20 transition hover:border-white/15 hover:bg-[#0d0d0d]"
                 >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
-                    <Icon className="h-5 w-5 text-white" strokeWidth={2.2} />
+                  <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border ${feature.iconClass}`}>
+                    <Icon className="h-5 w-5" strokeWidth={2.2} />
                   </div>
                   <h3 className="text-sm font-semibold text-white">{feature.title}</h3>
                   <p className="mt-2 text-xs leading-relaxed text-slate-400">
@@ -253,9 +268,10 @@ export default function MobileAppPage() {
         </section>
 
         {/* Install guide */}
-        <section className="mt-12 grid gap-5 rounded-3xl border border-white/10 bg-[#070707]/95 p-5 shadow-2xl shadow-black/25 sm:mt-16 sm:p-6 lg:grid-cols-[0.8fr_1.2fr] lg:p-8">
-          <div>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white text-black">
+        <section className="relative mt-12 grid gap-5 overflow-hidden rounded-3xl border border-white/10 bg-[#070707]/95 p-5 shadow-2xl shadow-black/25 sm:mt-16 sm:p-6 lg:grid-cols-[0.8fr_1.2fr] lg:p-8">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.12),transparent_34%)]" />
+          <div className="relative">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10 text-amber-300 shadow-[0_0_32px_rgba(251,191,36,0.12)]">
               <FileDown className="h-5 w-5" strokeWidth={2.3} />
             </div>
             <h2 className="text-2xl font-bold text-white">How to install</h2>
@@ -268,20 +284,20 @@ export default function MobileAppPage() {
               href={APK_DOWNLOAD_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 sm:w-auto"
+              className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-black transition hover:bg-slate-200 sm:w-auto"
             >
               <Download className="h-4 w-4" />
               Download APK
             </a>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="relative grid gap-3 sm:grid-cols-2">
             {installSteps.map((step, index) => (
               <div
                 key={step.title}
                 className="rounded-2xl border border-white/10 bg-black/45 p-4"
               >
-                <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white text-xs font-bold text-black">
+                <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-xl border border-emerald-400/20 bg-emerald-400/10 text-xs font-bold text-emerald-300">
                   {index + 1}
                 </div>
                 <h3 className="text-sm font-semibold text-white">{step.title}</h3>
@@ -301,9 +317,9 @@ export default function MobileAppPage() {
             return (
               <div
                 key={item.title}
-                className="rounded-2xl border border-white/10 bg-[#080808]/95 p-4"
+                className="rounded-2xl border border-white/10 bg-[#080808]/95 p-4 transition hover:border-white/15 hover:bg-[#0d0d0d]"
               >
-                <Icon className="mb-3 h-5 w-5 text-slate-300" />
+                <Icon className={`mb-3 h-5 w-5 ${item.iconClass}`} />
                 <h3 className="text-sm font-semibold text-white">{item.title}</h3>
                 <p className="mt-1 text-xs leading-relaxed text-slate-400">
                   {item.text}

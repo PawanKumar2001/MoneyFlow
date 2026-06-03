@@ -4,7 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useMonthStore } from "@/store/monthStore";
 import { getExpenses, deleteExpense } from "@/actions/expenses";
 import { getUserIncome, getMonthlyFreelanceIncome } from "@/actions/income";
-import { Plus, ReceiptText, Search, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowDownUp,
+  Filter,
+  Plus,
+  ReceiptText,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ExpenseCard from "@/components/expenses/ExpenseCard";
@@ -177,45 +184,53 @@ export default function DashboardPage() {
         onEditIncome={() => setShowEditIncome(true)}
       />
 
-      <div className="space-y-4 px-4 pb-6 pt-5 md:px-6 lg:px-8">
+      <div className="space-y-5 px-4 pb-7 pt-5 md:px-8 lg:px-10">
         {/* Header */}
-        <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-300/70">
               Dashboard
             </p>
-            <h2 className="text-lg font-semibold text-white">Expenses</h2>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <h2 className="text-2xl font-bold tracking-tight text-white md:text-[28px]">
+              Expenses
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
               {expenses.length} expense{expenses.length !== 1 ? "s" : ""} this month
             </p>
           </div>
 
-          <Button onClick={openAddExpense} className="w-full gap-2 rounded-xl sm:w-auto">
+          <Button
+            onClick={openAddExpense}
+            size="lg"
+            className="h-11 w-full gap-2 rounded-2xl px-5 shadow-[0_0_28px_rgba(255,255,255,0.08)] sm:w-auto"
+          >
             <Plus className="h-4 w-4" />
             Add Expense
           </Button>
         </section>
 
         {/* Unified Search + Filters */}
-        <section className="rounded-2xl border border-white/10 bg-[#090909]/95 p-2 shadow-2xl shadow-black/20">
-          <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#070907]/95 p-3 shadow-2xl shadow-black/25">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/35 to-transparent" />
+          <div className="pointer-events-none absolute -left-24 top-1/2 h-36 w-36 -translate-y-1/2 rounded-full bg-emerald-500/[0.08] blur-3xl" />
+          <div className="relative flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <Search className="absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-emerald-300/70" />
               <Input
                 placeholder="Search expenses"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                className="h-10 w-full rounded-xl border-white/10 bg-white/[0.035] pl-9 text-white placeholder:text-slate-600 focus:border-white/30 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-12 w-full rounded-2xl border-white/10 bg-black/45 pl-11 text-sm text-white placeholder:text-slate-600 focus:border-emerald-300/40 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:flex">
+            <div className="grid grid-cols-2 gap-3 sm:flex">
               <div className="relative">
-                <SlidersHorizontal className="pointer-events-none absolute left-3 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-slate-500 sm:block" />
+                <Filter className="pointer-events-none absolute left-4 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-amber-300/75 sm:block" />
                 <select
                   value={categoryFilter}
                   onChange={(event) => setCategoryFilter(event.target.value)}
-                  className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-52 sm:pl-9"
+                  className="h-12 w-full rounded-2xl border border-white/10 bg-black/45 px-4 py-2 text-sm font-medium text-white outline-none transition-colors focus:border-amber-300/40 sm:w-56 sm:pl-11"
                 >
                   {CATEGORIES.map((category) => (
                     <option key={category} value={category} className="bg-black">
@@ -225,34 +240,40 @@ export default function DashboardPage() {
                 </select>
               </div>
 
-              <select
-                value={sortBy}
-                onChange={(event) => setSortBy(event.target.value)}
-                className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-36"
-              >
-                <option value="newest" className="bg-black">
-                  Newest
-                </option>
-                <option value="oldest" className="bg-black">
-                  Oldest
-                </option>
-                <option value="highest" className="bg-black">
-                  Highest
-                </option>
-                <option value="lowest" className="bg-black">
-                  Lowest
-                </option>
-              </select>
+              <div className="relative">
+                <ArrowDownUp className="pointer-events-none absolute left-4 top-1/2 hidden h-4 w-4 -translate-y-1/2 text-sky-300/75 sm:block" />
+                <select
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value)}
+                  className="h-12 w-full rounded-2xl border border-white/10 bg-black/45 px-4 py-2 text-sm font-medium text-white outline-none transition-colors focus:border-sky-300/40 sm:w-40 sm:pl-11"
+                >
+                  <option value="newest" className="bg-black">
+                    Newest
+                  </option>
+                  <option value="oldest" className="bg-black">
+                    Oldest
+                  </option>
+                  <option value="highest" className="bg-black">
+                    Highest
+                  </option>
+                  <option value="lowest" className="bg-black">
+                    Lowest
+                  </option>
+                </select>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Expense List */}
-        <section className="flex min-h-[260px] max-h-[calc(100dvh-360px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/25 md:max-h-[560px]">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+        <section className="relative flex min-h-[300px] max-h-[calc(100dvh-365px)] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#070807]/95 shadow-2xl shadow-black/30 md:max-h-[620px]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-full bg-amber-500/[0.06] blur-3xl" />
+
+          <div className="relative flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div>
-              <p className="text-sm font-medium text-white">Expense history</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-base font-semibold text-white">Expense history</p>
+              <p className="mt-0.5 text-xs text-slate-500">
                 {filtered.length} visible item{filtered.length !== 1 ? "s" : ""}
               </p>
             </div>
@@ -264,7 +285,7 @@ export default function DashboardPage() {
                   setSearch("");
                   setCategoryFilter("All");
                 }}
-                className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/[0.08] hover:text-white"
+                className="rounded-xl border border-white/10 bg-white/[0.045] px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/[0.09] hover:text-white"
               >
                 Clear filters
               </button>
@@ -276,29 +297,29 @@ export default function DashboardPage() {
               {[...Array(4)].map((_, index) => (
                 <div
                   key={index}
-                  className="h-16 animate-pulse rounded-xl border border-white/5 bg-white/[0.035]"
+                  className="h-20 animate-pulse rounded-2xl border border-white/5 bg-white/[0.035]"
                 />
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-1 items-center justify-center px-5 py-12 text-center">
+            <div className="relative flex flex-1 items-center justify-center px-5 py-14 text-center">
               <div className="flex max-w-sm flex-col items-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
-                  <ReceiptText className="h-7 w-7 text-white" strokeWidth={2.2} />
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-emerald-400/20 bg-emerald-400/10">
+                  <ReceiptText className="h-8 w-8 text-emerald-300" strokeWidth={2.2} />
                 </div>
 
-                <h3 className="text-base font-semibold text-white">
+                <h3 className="text-lg font-semibold text-white">
                   No expenses found
                 </h3>
 
-                <p className="mt-1 text-sm leading-relaxed text-slate-400">
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">
                   {isFiltering
                     ? "Try adjusting your search or filters."
                     : "No expenses added yet. Start tracking your spending!"}
                 </p>
 
                 {!isFiltering && (
-                  <Button onClick={openAddExpense} className="mt-5 rounded-xl">
+                  <Button onClick={openAddExpense} className="mt-6 rounded-2xl">
                     Add Expense
                   </Button>
                 )}
@@ -310,7 +331,7 @@ export default function DashboardPage() {
                 if (window.innerWidth >= 768) return;
                 setSummaryScrolled(event.currentTarget.scrollTop > 8);
               }}
-              className="flex-1 space-y-2 overflow-y-auto p-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 sm:p-4"
+              className="relative flex-1 space-y-3 overflow-y-auto p-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 sm:p-4"
             >
               {filtered.map((expense, index) => (
                 <ExpenseCard

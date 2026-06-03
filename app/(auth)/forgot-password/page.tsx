@@ -56,23 +56,28 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="relative z-10 flex min-h-[calc(100dvh-69px)] items-center justify-center px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="w-full max-w-md"
-      >
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/40">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_36%)]" />
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.32, ease: "easeOut" }}
+      className="w-full"
+    >
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/50">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.10),transparent_34%),radial-gradient(circle_at_top_right,rgba(245,158,11,0.08),transparent_32%)]" />
 
-          <div className="relative px-5 pb-6 pt-6 sm:px-7 sm:pb-7 sm:pt-7">
-            <div className="mb-6 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white shadow-lg shadow-black/20">
+          <div className="relative px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
+            <div className="mb-5 text-center">
+              <div
+                className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border shadow-lg ${
+                  step === "form"
+                    ? "border-sky-400/20 bg-sky-400/10 text-sky-300 shadow-sky-500/10"
+                    : "border-emerald-400/20 bg-emerald-400/10 text-emerald-300 shadow-emerald-500/10"
+                }`}
+              >
                 {step === "form" ? (
-                  <ShieldCheck className="h-6 w-6" strokeWidth={2.2} />
+                  <ShieldCheck className="h-6 w-6" strokeWidth={2.3} />
                 ) : (
-                  <CheckCircle2 className="h-6 w-6" strokeWidth={2.2} />
+                  <CheckCircle2 className="h-6 w-6" strokeWidth={2.3} />
                 )}
               </div>
 
@@ -162,7 +167,7 @@ export default function ForgotPasswordPage() {
 
                   <Link
                     href="/login"
-                    className="mt-5 flex items-center justify-center gap-2 text-sm text-slate-400 transition-colors hover:text-white"
+                    className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-400 transition-colors hover:text-white"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Back to login
@@ -177,10 +182,10 @@ export default function ForgotPasswordPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -18 }}
                   transition={{ duration: 0.22 }}
-                  className="space-y-5 text-center"
+                  className="space-y-4 text-center"
                 >
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white">
-                    <Mail className="h-7 w-7" strokeWidth={2.2} />
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10 text-amber-300 shadow-lg shadow-amber-500/10">
+                    <Mail className="h-6 w-6" strokeWidth={2.3} />
                   </div>
 
                   <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left">
@@ -229,7 +234,6 @@ export default function ForgotPasswordPage() {
             </AnimatePresence>
           </div>
         </div>
-      </motion.div>
-    </div>
+    </motion.div>
   );
 }

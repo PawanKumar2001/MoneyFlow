@@ -9,7 +9,14 @@ import {
 } from "@/actions/income";
 import { getExpenses } from "@/actions/expenses";
 import { getCurrencySymbol } from "@/lib/currency";
-import { PlusCircle, Search, WalletCards } from "lucide-react";
+import {
+  ArrowUpRight,
+  BadgeDollarSign,
+  Plus,
+  Search,
+  TrendingUp,
+  WalletCards,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -67,7 +74,10 @@ export default function IncomePage() {
       setEntries(incomeEntries);
       setCurrency(userData?.currency ?? "INR");
       setTotalExpenses(
-        monthlyExpenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0)
+        monthlyExpenses.reduce(
+          (sum, expense) => sum + Number(expense.amount || 0),
+          0
+        )
       );
     } catch (error) {
       console.error("Failed to load income entries:", error);
@@ -84,6 +94,12 @@ export default function IncomePage() {
     fetchEntries();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, year]);
+
+  useEffect(() => {
+    if (!search.trim()) {
+      setSummaryScrolled(false);
+    }
+  }, [search]);
 
   const filtered = useMemo(() => {
     let result = [...entries];
@@ -157,74 +173,98 @@ export default function IncomePage() {
         incomeType="FREELANCER"
       />
 
-      <div className="space-y-4 px-4 pb-6 pt-5 md:px-8 lg:px-12">
+      <div className="space-y-5 px-4 pb-7 pt-6 md:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-white">Income</h2>
-            <p className="text-xs text-slate-500">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Dashboard
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+              Income
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
               {entries.length} entr{entries.length !== 1 ? "ies" : "y"} this month · {symbol}
               {totalEarned.toLocaleString()} earned
             </p>
           </div>
 
-          <Button onClick={openAddIncome} className="w-full gap-2 sm:w-auto">
-            <PlusCircle className="h-4 w-4" />
+          <Button
+            onClick={openAddIncome}
+            size="lg"
+            className="h-11 w-full gap-2 rounded-2xl px-5 shadow-lg shadow-emerald-500/10 sm:w-auto"
+          >
+            <Plus className="h-4 w-4" />
             Add Income
           </Button>
-        </div>
+        </section>
 
         {/* Search + Sort */}
-        <div className="rounded-2xl border border-white/10 bg-[#080808]/95 p-2 shadow-xl shadow-black/20">
-          <div className="flex flex-col gap-2 sm:flex-row">
+        <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#080808]/95 p-2.5 shadow-2xl shadow-black/30">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.10),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.08),transparent_36%)]" />
+
+          <div className="relative flex flex-col gap-2.5 sm:flex-row sm:items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <div className="absolute left-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-xl border border-emerald-500/15 bg-emerald-500/10 text-emerald-300">
+                <Search className="h-3.5 w-3.5" strokeWidth={2.3} />
+              </div>
               <Input
                 placeholder="Search income entries"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                className="h-10 w-full border-white/10 bg-black/40 pl-9 text-white placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-white/30"
+                className="h-12 w-full rounded-2xl border-white/10 bg-black/45 pl-12 text-sm text-white placeholder:text-slate-600 focus:border-emerald-500/30 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
 
-            <div className="flex gap-2">
-              <select
-                value={sortBy}
-                onChange={(event) => setSortBy(event.target.value)}
-                className="h-10 w-full cursor-pointer rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-white/30 sm:w-36"
-              >
-                {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value} className="bg-black">
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+            <div className="flex gap-2.5">
+              <div className="relative flex-1 sm:flex-none">
+                <div className="pointer-events-none absolute left-3 top-1/2 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-xl border border-blue-500/15 bg-blue-500/10 text-blue-300 sm:flex">
+                  <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.3} />
+                </div>
+                <select
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value)}
+                  className="h-12 w-full cursor-pointer rounded-2xl border border-white/10 bg-black/45 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-blue-500/30 sm:w-44 sm:pl-12"
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value} className="bg-black">
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               {isSearching && (
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={() => setSearch("")}
-                  className="shrink-0"
+                  className="h-12 shrink-0 rounded-2xl px-4"
                 >
                   Clear
                 </Button>
               )}
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Income List */}
-        <div className="flex min-h-[300px] max-h-[calc(100dvh-360px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/25 md:max-h-[560px]">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-            <div>
-              <h3 className="text-sm font-semibold text-white">Income history</h3>
-              <p className="text-xs text-slate-500">
-                {filtered.length} visible entr{filtered.length !== 1 ? "ies" : "y"}
-              </p>
+        <section className="flex min-h-[320px] max-h-[calc(100dvh-360px)] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/30 md:max-h-[620px]">
+          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-emerald-500/15 bg-emerald-500/10 text-emerald-300 shadow-lg shadow-emerald-500/10">
+                <BadgeDollarSign className="h-5 w-5" strokeWidth={2.25} />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white">Income history</h3>
+                <p className="text-xs text-slate-500">
+                  {filtered.length} visible entr{filtered.length !== 1 ? "ies" : "y"}
+                </p>
+              </div>
             </div>
 
-            <div className="hidden rounded-full border border-white/10 bg-black/40 px-3 py-1 text-xs text-slate-400 sm:block">
+            <div className="hidden items-center gap-2 rounded-full border border-emerald-500/15 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300 sm:flex">
+              <TrendingUp className="h-3.5 w-3.5" />
               Freelancer mode
             </div>
           </div>
@@ -234,29 +274,29 @@ export default function IncomePage() {
               {[...Array(4)].map((_, index) => (
                 <div
                   key={index}
-                  className="h-16 animate-pulse rounded-xl bg-white/[0.04]"
+                  className="h-[76px] animate-pulse rounded-2xl border border-white/5 bg-white/[0.035]"
                 />
               ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-1 items-center justify-center px-5 py-12 text-center">
               <div className="flex max-w-sm flex-col items-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
-                  <WalletCards className="h-7 w-7 text-white" strokeWidth={2.2} />
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-emerald-500/15 bg-emerald-500/10 text-emerald-300 shadow-lg shadow-emerald-500/10">
+                  <WalletCards className="h-8 w-8" strokeWidth={2.2} />
                 </div>
 
-                <h3 className="text-base font-semibold text-white">
+                <h3 className="text-lg font-semibold text-white">
                   {isSearching ? "No matching income found" : "No income added yet"}
                 </h3>
 
-                <p className="mt-1 max-w-xs text-sm leading-relaxed text-slate-400">
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-400">
                   {isSearching
                     ? "Try a different search term or clear your search."
                     : "Add your earnings for this month to start tracking your income."}
                 </p>
 
                 {!isSearching && (
-                  <Button onClick={openAddIncome} className="mt-5">
+                  <Button onClick={openAddIncome} className="mt-6 rounded-2xl">
                     Add Income
                   </Button>
                 )}
@@ -268,7 +308,7 @@ export default function IncomePage() {
                 if (window.innerWidth >= 768) return;
                 setSummaryScrolled(event.currentTarget.scrollTop > 8);
               }}
-              className="flex-1 space-y-2 overflow-y-auto p-3 sm:p-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10"
+              className="flex-1 space-y-3 overflow-y-auto p-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 sm:p-4"
             >
               {filtered.map((entry, index) => (
                 <IncomeCard
@@ -285,7 +325,7 @@ export default function IncomePage() {
               ))}
             </div>
           )}
-        </div>
+        </section>
       </div>
 
       <IncomeFormDialog

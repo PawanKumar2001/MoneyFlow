@@ -15,6 +15,7 @@ import {
   CircleAlert,
   KeyRound,
   LoaderCircle,
+  ShieldCheck,
 } from "lucide-react";
 
 type FormData = {
@@ -23,6 +24,8 @@ type FormData = {
 };
 
 type Step = "loading" | "form" | "success" | "invalid";
+
+type HeaderTone = "blue" | "green" | "red" | "amber";
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
@@ -108,27 +111,23 @@ export default function ResetPasswordPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
-      className="flex min-h-[calc(100dvh-140px)] w-full items-center justify-center px-4 py-8"
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="w-full max-w-md"
     >
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/40">
-        <div className="relative px-5 pt-6 text-center sm:px-7 sm:pt-7">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_35%)]" />
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/50">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.10),transparent_32%),radial-gradient(circle_at_top_right,rgba(251,191,36,0.08),transparent_34%)]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-          <div className="relative">
-            <img
-              src="/favicon.png"
-              alt="MoneyFlow"
-              className="mx-auto mb-3 h-11 w-11 rounded-2xl border border-white/10"
-            />
-
+        <div className="relative px-5 pb-6 pt-6 sm:px-7 sm:pb-7">
+          <div className="mb-5 text-center">
             <AnimatePresence mode="wait">
               {step === "loading" && (
                 <HeaderContent
                   key="loading-header"
-                  icon={<LoaderCircle className="h-5 w-5 animate-spin" />}
+                  tone="blue"
+                  icon={<LoaderCircle className="h-6 w-6 animate-spin" />}
                   title="Verifying link"
                   description="Checking whether your password reset link is still valid."
                 />
@@ -137,7 +136,8 @@ export default function ResetPasswordPage() {
               {step === "form" && (
                 <HeaderContent
                   key="form-header"
-                  icon={<KeyRound className="h-5 w-5" />}
+                  tone="green"
+                  icon={<KeyRound className="h-6 w-6" />}
                   title="Reset password"
                   description="Enter a new password for your MoneyFlow account."
                 />
@@ -146,7 +146,8 @@ export default function ResetPasswordPage() {
               {step === "success" && (
                 <HeaderContent
                   key="success-header"
-                  icon={<Check className="h-5 w-5" />}
+                  tone="green"
+                  icon={<Check className="h-6 w-6" />}
                   title="Password reset"
                   description="Your password was updated. Redirecting you to login."
                 />
@@ -155,16 +156,15 @@ export default function ResetPasswordPage() {
               {step === "invalid" && (
                 <HeaderContent
                   key="invalid-header"
-                  icon={<CircleAlert className="h-5 w-5" />}
+                  tone="red"
+                  icon={<CircleAlert className="h-6 w-6" />}
                   title="Invalid link"
                   description="This reset link is invalid, expired, or already used."
                 />
               )}
             </AnimatePresence>
           </div>
-        </div>
 
-        <div className="px-5 pb-6 pt-5 sm:px-7 sm:pb-7">
           <AnimatePresence mode="wait">
             {step === "loading" && (
               <motion.div
@@ -172,9 +172,9 @@ export default function ResetPasswordPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center gap-3 py-8"
+                className="flex flex-col items-center justify-center gap-3 py-5"
               >
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/15 border-t-white" />
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-400/15 border-t-sky-300" />
                 <p className="text-sm text-slate-400">Please wait...</p>
               </motion.div>
             )}
@@ -185,13 +185,14 @@ export default function ResetPasswordPage() {
                 initial={{ opacity: 0, x: 18 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -18 }}
+                transition={{ duration: 0.22 }}
               >
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div className="space-y-1.5">
                     <Label className="text-xs text-slate-300">New Password</Label>
                     <PasswordInput
                       placeholder="••••••••"
-                      className="h-10 border-white/10 bg-white/[0.04] pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/30"
+                      className="h-10 border-white/10 bg-white/[0.04] pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
                       {...register("password", {
                         required: "Password is required",
                         minLength: {
@@ -213,7 +214,7 @@ export default function ResetPasswordPage() {
                     </Label>
                     <PasswordInput
                       placeholder="••••••••"
-                      className="h-10 border-white/10 bg-white/[0.04] pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/30"
+                      className="h-10 border-white/10 bg-white/[0.04] pr-10 text-sm text-white placeholder:text-slate-500 focus-visible:ring-0 focus:border-white/40"
                       {...register("confirmPassword", {
                         required: "Please confirm your password",
                         validate: (value) =>
@@ -227,8 +228,9 @@ export default function ResetPasswordPage() {
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                    <p className="text-xs leading-relaxed text-slate-400">
+                  <div className="flex gap-3 rounded-xl border border-sky-400/15 bg-sky-400/10 p-3">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-sky-300" />
+                    <p className="text-xs leading-relaxed text-slate-300">
                       Use at least 8 characters. After resetting, you can sign in
                       with your new password immediately.
                     </p>
@@ -249,14 +251,11 @@ export default function ResetPasswordPage() {
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-5 py-3 text-center"
+                transition={{ duration: 0.22 }}
+                className="space-y-4 py-2 text-center"
               >
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white text-black shadow-lg shadow-white/10">
-                  <Check className="h-7 w-7" strokeWidth={2.4} />
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-sm leading-relaxed text-slate-400">
+                <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4">
+                  <p className="text-sm leading-relaxed text-slate-300">
                     Your password has been successfully reset. You will be
                     redirected to login in a moment.
                   </p>
@@ -274,7 +273,7 @@ export default function ResetPasswordPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-5 py-3 text-center"
+                className="space-y-4 py-2 text-center"
               >
                 <ErrorBox message={tokenError} />
 
@@ -297,11 +296,24 @@ function HeaderContent({
   icon,
   title,
   description,
+  tone,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
+  tone: HeaderTone;
 }) {
+  const toneClass = {
+    blue:
+      "border-sky-400/20 bg-sky-400/10 text-sky-300 shadow-[0_0_28px_rgba(56,189,248,0.12)]",
+    green:
+      "border-emerald-400/20 bg-emerald-400/10 text-emerald-300 shadow-[0_0_28px_rgba(52,211,153,0.12)]",
+    amber:
+      "border-amber-400/20 bg-amber-400/10 text-amber-300 shadow-[0_0_28px_rgba(251,191,36,0.12)]",
+    red:
+      "border-red-400/20 bg-red-400/10 text-red-300 shadow-[0_0_28px_rgba(248,113,113,0.12)]",
+  }[tone];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
@@ -309,7 +321,9 @@ function HeaderContent({
       exit={{ opacity: 0, y: -6 }}
       className="mx-auto max-w-sm"
     >
-      <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white">
+      <div
+        className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border ${toneClass}`}
+      >
         {icon}
       </div>
       <h1 className="text-xl font-semibold text-white sm:text-2xl">{title}</h1>
@@ -327,7 +341,7 @@ function ErrorBox({ message }: { message: string }) {
       animate={{ opacity: 1, y: 0 }}
       className="rounded-xl border border-red-500/20 bg-red-500/10 p-3"
     >
-      <p className="text-center text-sm text-red-300">{message}</p>
+      <p className="text-center text-xs leading-relaxed text-red-300">{message}</p>
     </motion.div>
   );
 }

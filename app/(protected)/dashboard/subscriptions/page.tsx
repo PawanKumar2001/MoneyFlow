@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { getSubscriptions, deleteSubscription } from "@/actions/subscriptions";
 import { getUserIncome } from "@/actions/income";
 import { getCurrencySymbol } from "@/lib/currency";
-import { CalendarClock, PlusCircle, Repeat2 } from "lucide-react";
+import {
+  BadgeCheck,
+  CalendarClock,
+  CreditCard,
+  Plus,
+  Repeat2,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SubscriptionCard from "@/components/subscriptions/SubscriptionCard";
 import SubscriptionFormDialog from "@/components/subscriptions/SubscriptionFormDialog";
@@ -77,7 +84,9 @@ export default function SubscriptionsPage() {
     const idToDelete = deletingId;
     setDeleteLoading(true);
     setDeletingId(null);
-    setSubscriptions((prev) => prev.filter((subscription) => subscription.id !== idToDelete));
+    setSubscriptions((prev) =>
+      prev.filter((subscription) => subscription.id !== idToDelete)
+    );
 
     try {
       const result = await deleteSubscription(idToDelete);
@@ -98,17 +107,25 @@ export default function SubscriptionsPage() {
     }
   };
 
-  const totalMonthly = subscriptions.reduce((sum, subscription) => sum + subscription.amount, 0);
+  const totalMonthly = subscriptions.reduce(
+    (sum, subscription) => sum + subscription.amount,
+    0
+  );
   const symbol = getCurrencySymbol(currency);
 
   return (
     <>
-      <div className="space-y-4 px-4 pt-6 pb-6 md:px-8 lg:px-12">
+      <div className="space-y-5 px-4 pb-7 pt-6 md:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-white">Subscriptions</h2>
-            <p className="text-xs text-slate-500">
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Recurring payments
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+              Subscriptions
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
               {subscriptions.length} active · {symbol}
               {totalMonthly.toLocaleString()} / month
             </p>
@@ -116,56 +133,90 @@ export default function SubscriptionsPage() {
 
           <Button
             onClick={openCreateForm}
-            className="w-full gap-2 sm:w-auto"
+            className="h-12 w-full gap-2 rounded-2xl px-5 text-sm font-semibold shadow-lg shadow-white/10 sm:w-auto"
           >
-            <PlusCircle className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Add Subscription
           </Button>
-        </div>
+        </section>
 
         {/* Overview Card */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 p-4 shadow-2xl shadow-black/25">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_34%)]" />
+        <section className="relative overflow-hidden rounded-[1.65rem] border border-white/10 bg-[#080808]/95 p-5 shadow-2xl shadow-black/30 md:p-6">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/40 to-transparent" />
+          <div className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-amber-500/[0.08] blur-3xl" />
+          <div className="pointer-events-none absolute -right-28 bottom-0 h-72 w-72 rounded-full bg-emerald-500/[0.055] blur-3xl" />
 
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
-                <Repeat2 className="h-5 w-5 text-white" strokeWidth={2.2} />
+          <div className="relative grid gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+            <div className="flex items-start gap-4">
+              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10 text-amber-300 shadow-lg shadow-amber-500/10">
+                <Repeat2 className="h-6 w-6" strokeWidth={2.3} />
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-black bg-emerald-400 text-black">
+                  <BadgeCheck className="h-3 w-3" strokeWidth={3} />
+                </span>
               </div>
 
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
                   Subscription overview
                 </p>
-                <p className="mt-1 text-2xl font-bold text-white">
-                  {symbol}
-                  {totalMonthly.toLocaleString()}
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                  Auto-generated as expenses every month.
+                <div className="mt-2 flex flex-wrap items-end gap-x-3 gap-y-1">
+                  <p className="text-3xl font-bold leading-none text-white md:text-4xl">
+                    {symbol}
+                    {totalMonthly.toLocaleString()}
+                  </p>
+                  <p className="pb-1 text-sm font-medium text-slate-500">
+                    per month
+                  </p>
+                </div>
+                <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-400">
+                  Recurring payments are tracked separately and generated as
+                  expenses every month, so your spending stays accurate.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:w-56">
-              <OverviewStat label="Active" value={String(subscriptions.length)} />
-              <OverviewStat label="Cycle" value="Monthly" />
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              <OverviewStat
+                icon={CreditCard}
+                label="Active"
+                value={String(subscriptions.length)}
+                tone="green"
+              />
+              <OverviewStat
+                icon={CalendarClock}
+                label="Cycle"
+                value="Monthly"
+                tone="amber"
+              />
+              <OverviewStat
+                icon={Sparkles}
+                label="Auto"
+                value="Enabled"
+                tone="blue"
+              />
             </div>
           </div>
-        </div>
+        </section>
 
         {/* List */}
-        <div className="flex min-h-[280px] max-h-[calc(100dvh-330px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/20 md:max-h-[560px]">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-            <div>
-              <h3 className="text-sm font-semibold text-white">Subscription list</h3>
-              <p className="text-xs text-slate-500">
-                Recurring payments tracked by MoneyFlow
-              </p>
+        <section className="flex min-h-[320px] max-h-[calc(100dvh-340px)] flex-col overflow-hidden rounded-[1.65rem] border border-white/10 bg-[#080808]/95 shadow-2xl shadow-black/25 md:max-h-[620px]">
+          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-amber-400/20 bg-amber-400/10 text-amber-300 sm:flex">
+                <CalendarClock className="h-5 w-5" strokeWidth={2.2} />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-white">
+                  Subscription list
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Recurring payments tracked by MoneyFlow
+                </p>
+              </div>
             </div>
 
-            <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-slate-400 sm:flex">
-              <CalendarClock className="h-3.5 w-3.5" />
+            <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-medium text-slate-400 sm:flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
               Monthly cycle
             </div>
           </div>
@@ -175,33 +226,34 @@ export default function SubscriptionsPage() {
               {[...Array(3)].map((_, index) => (
                 <div
                   key={index}
-                  className="h-20 animate-pulse rounded-xl border border-white/10 bg-white/[0.04]"
+                  className="h-24 animate-pulse rounded-2xl border border-white/10 bg-white/[0.04]"
                 />
               ))}
             </div>
           ) : subscriptions.length === 0 ? (
             <div className="flex flex-1 items-center justify-center px-6 py-12 text-center">
               <div className="flex max-w-sm flex-col items-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
-                  <Repeat2 className="h-7 w-7 text-white" strokeWidth={2.2} />
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-amber-400/20 bg-amber-400/10 text-amber-300 shadow-lg shadow-amber-500/10">
+                  <Repeat2 className="h-8 w-8" strokeWidth={2.2} />
                 </div>
 
-                <h3 className="text-base font-semibold text-white">
+                <h3 className="text-lg font-semibold text-white">
                   No subscriptions yet
                 </h3>
 
-                <p className="mt-1 text-sm leading-relaxed text-slate-400">
-                  Add recurring payments like Netflix, internet, or memberships and MoneyFlow will track them every month.
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                  Add recurring payments like Netflix, internet, or memberships
+                  and MoneyFlow will track them every month.
                 </p>
 
-                <Button onClick={openCreateForm} className="mt-5 gap-2">
-                  <PlusCircle className="h-4 w-4" />
+                <Button onClick={openCreateForm} className="mt-6 h-11 gap-2 rounded-2xl">
+                  <Plus className="h-4 w-4" />
                   Add Subscription
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="flex-1 space-y-2 overflow-y-auto p-3 sm:p-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+            <div className="flex-1 space-y-3 overflow-y-auto p-3 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 sm:p-4">
               {subscriptions.map((subscription, index) => (
                 <SubscriptionCard
                   key={subscription.id}
@@ -217,7 +269,7 @@ export default function SubscriptionsPage() {
               ))}
             </div>
           )}
-        </div>
+        </section>
       </div>
 
       <SubscriptionFormDialog
@@ -241,11 +293,36 @@ export default function SubscriptionsPage() {
   );
 }
 
-function OverviewStat({ label, value }: { label: string; value: string }) {
+function OverviewStat({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: typeof CreditCard;
+  label: string;
+  value: string;
+  tone: "green" | "amber" | "blue";
+}) {
+  const toneClass = {
+    green: "border-emerald-400/20 bg-emerald-400/10 text-emerald-300",
+    amber: "border-amber-400/20 bg-amber-400/10 text-amber-300",
+    blue: "border-sky-400/20 bg-sky-400/10 text-sky-300",
+  }[tone];
+
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-      <p className="text-[11px] font-medium text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
+    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3.5">
+      <div className="mb-3 flex items-center gap-2">
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-xl border ${toneClass}`}
+        >
+          <Icon className="h-4 w-4" strokeWidth={2.2} />
+        </div>
+        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500">
+          {label}
+        </p>
+      </div>
+      <p className="text-base font-bold text-white">{value}</p>
     </div>
   );
 }
