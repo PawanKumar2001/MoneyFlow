@@ -117,8 +117,8 @@ export default function Navbar({
                     key={tab.href}
                     href={tab.href}
                     className={`relative flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors xl:px-4 ${isActive
-                        ? "text-white"
-                        : "text-slate-400 hover:bg-white/[0.045] hover:text-white"
+                      ? "text-white"
+                      : "text-slate-400 hover:bg-white/[0.045] hover:text-white"
                       }`}
                   >
                     {isActive && (
@@ -158,14 +158,13 @@ export default function Navbar({
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="group flex h-11 items-center gap-2 rounded-2xl border border-white/10 bg-[#080b0b]/80 p-1 pr-2 text-slate-300 outline-none transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-300/25">
-                    <Avatar className="h-9 w-9 overflow-hidden rounded-full border-0 bg-white/10 shadow-none">
+                  <button className="group flex h-10 items-center gap-2 rounded-full bg-transparent p-0 text-slate-300 outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-emerald-300/25 sm:h-11 sm:rounded-2xl sm:border sm:border-white/10 sm:bg-[#080b0b]/80 sm:p-1 sm:pr-2">
+                    <Avatar className="h-9 w-9 overflow-hidden rounded-full border border-white/10 bg-black">
                       <AvatarImage src={image ?? ""} />
                       <AvatarFallback className="bg-white text-xs font-semibold text-black">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
-
                     <ChevronDown className="hidden h-3.5 w-3.5 text-slate-500 transition-transform group-data-[state=open]:rotate-180 sm:block" />
                   </button>
                 </DropdownMenuTrigger>
@@ -252,14 +251,14 @@ export default function Navbar({
                     href={tab.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium transition-colors ${isActive
-                        ? "border-white/15 bg-white/[0.08] text-white"
-                        : "border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+                      ? "border-white/15 bg-white/[0.08] text-white"
+                      : "border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
                       }`}
                   >
                     <span
                       className={`flex h-10 w-10 items-center justify-center rounded-xl border ${isActive
-                          ? "border-white/15 bg-white/[0.08]"
-                          : "border-white/10 bg-white/[0.04]"
+                        ? "border-white/15 bg-white/[0.08]"
+                        : "border-white/10 bg-white/[0.04]"
                         }`}
                     >
                       <Icon

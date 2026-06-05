@@ -57,7 +57,7 @@ export default function RootLayout({
         <div className="relative z-10 flex min-h-screen flex-col">
           <div className="flex flex-1 flex-col">{children}</div>
 
-          <footer className="shrink-0 border-t border-white/10 bg-black/55 py-4 backdrop-blur-md">
+          <footer className="shrink-0 border-t border-white/5 bg-transparent py-4">
             <div className="flex flex-col items-center justify-center gap-1 text-center">
               <p className="text-xs font-medium text-slate-400">
                 MoneyFlow v2.0.0
