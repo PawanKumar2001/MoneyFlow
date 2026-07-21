@@ -72,19 +72,14 @@ export default async function Home() {
               />
             </div>
 
-            <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200">
-              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
-              Personal finance tracker
-            </div>
-
             <h1 className="mx-auto max-w-3xl text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl">
               MoneyFlow
             </h1>
 
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-slate-400 sm:text-base md:text-lg">
-              Know exactly where your money goes. Track expenses, manage income,
-              and stay aware of monthly subscriptions in one clean dashboard.
-            </p>
+            <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200">
+              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
+              Know Exactly Where Your Money Goes
+            </div>
 
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
